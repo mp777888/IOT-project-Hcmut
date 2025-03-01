@@ -1,0 +1,19 @@
+package com.example.iot_project.Enity;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class DHT20Sensor extends Sensor{
+    double temperature;
+    double humidity;
+
+}
