@@ -18,6 +18,7 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Report {
     @Id
-    String id = UUID.randomUUID().toString();;
-
+    String id = UUID.randomUUID().toString();
+    String device;
+    String description;
 }

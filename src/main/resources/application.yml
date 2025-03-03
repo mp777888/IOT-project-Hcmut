@@ -1,0 +1,24 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+spring:
+  application:
+    name: iot-project
+  data:
+    mongodb:
+      uri: mongodb+srv://root:root@cluster0-iotproject.ovabr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0-IOTproject
+      database: db1
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: "940706370382-7rvr872c9e901bnive669k3otin44ej6.apps.googleusercontent.com"
+            client-secret: "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"
+            scope:
+                - email
+                - profile
+                - openid
+jwt:
+  signerKey: "cu+ODg482KxZvCd26KS9JRGbJZjtvGWrF+ZGlgqjIPTf5YImGQ9r/VDAjQUsTbgN"

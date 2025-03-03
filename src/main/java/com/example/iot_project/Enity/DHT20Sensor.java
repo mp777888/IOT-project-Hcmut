@@ -12,7 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DHT20Sensor extends Sensor{
+public class DHT20Sensor extends Device{
     double temperature;
     double humidity;
 
