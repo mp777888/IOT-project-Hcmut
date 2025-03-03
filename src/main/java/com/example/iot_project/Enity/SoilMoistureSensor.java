@@ -13,6 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SoilMoistureSensor extends Sensor{
+public class SoilMoistureSensor extends Device{
     double soilMoisture;
 }

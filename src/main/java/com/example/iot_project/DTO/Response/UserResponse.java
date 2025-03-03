@@ -1,29 +1,22 @@
-package com.example.iot_project.Enity;
-
+package com.example.iot_project.DTO.Response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
-@Document
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User {
-    @Id
-    String id ;
+public class UserResponse {
+    String id;
     String username;
-    String password;
     String firstname;
     String lastname;
+    String email;
     String gender;
     String phonenum;
-    String email;
     LocalDate dob;
 }

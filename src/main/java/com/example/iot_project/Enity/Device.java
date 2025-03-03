@@ -1,0 +1,34 @@
+package com.example.iot_project.Enity;
+
+import com.example.iot_project.Enum.DeviceType;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Date;
+import java.util.UUID;
+
+@Document
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+@FieldDefaults(level = AccessLevel.PROTECTED)
+public abstract class Device {
+    @Id
+    String id = UUID.randomUUID().toString();;
+    String name_device;
+    Boolean status;
+    DeviceType type;
+    String location;
+    Date timestamp;
+
+
+    @DBRef
+    Report report;
+
+}

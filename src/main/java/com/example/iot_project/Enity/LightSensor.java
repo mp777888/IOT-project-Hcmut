@@ -13,6 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LightSensor extends Sensor{
+public class LightSensor extends Device{
     double lightIntensity;
 }
