@@ -27,25 +27,28 @@ public class AuthenController {
     }
 
 
-//    @GetMapping("/callback")
-//    public ApiResponse<String> googleLogin(@AuthenticationPrincipal OidcUser oidcUser) {
-//        if (oidcUser != null) {
-//            String email = oidcUser.getEmail(); // Lấy email từ thông tin Google
+    @GetMapping("/callback")
+    public ApiResponse<AuthenResponse> googleLogin(@AuthenticationPrincipal OidcUser oidcUser) {
+        if (oidcUser != null) {
+            String email = oidcUser.getEmail(); // Lấy email từ thông tin Google
 //            String name = oidcUser.getFullName(); // Lấy tên từ thông tin Google
 //            String id = oidcUser.getSubject(); // Lấy openid từ thông tin Google
-//            String token = authenticateService.authenticate(email,name,id).getToken(); // Tạo token JWT
-//            return ApiResponse.<String>builder()
-//                    .code(200)
-//                    .message("Login successful")
-//                    .result(token)
-//                    .build();
-//        }
-//        return ApiResponse.<String>builder()
-//                .code(401)
-//                .message("Authentication failed")
-//                .result(null)
-//                .build();
-//    }
+
+            // Gọi service để tạo token JWT nội bộ
+            AuthenResponse authenResponse = authenticateService.authenticateByGoogle(email);
+
+            return ApiResponse.<AuthenResponse>builder()
+                    .code(200)
+                    .message("Login successful")
+                    .result(authenResponse)
+                    .build();
+        }
+        return ApiResponse.<AuthenResponse>builder()
+                .code(401)
+                .message("Authentication failed")
+                .result(null)
+                .build();
+    }
 
 
 }

@@ -5,6 +5,7 @@ import com.example.iot_project.DTO.Request.UserUpdateRequest;
 import com.example.iot_project.DTO.Response.UserResponse;
 import com.example.iot_project.Exception.ApiResponse;
 import com.example.iot_project.Service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,7 +19,7 @@ public class UserController {
 
 
     @PostMapping("/create")
-    public ApiResponse<UserResponse> createUser(@RequestBody UserCreateRequest request){
+    public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreateRequest request){
         return ApiResponse.<UserResponse>builder()
                 .code(200)
                 .result(userService.createUser(request))
