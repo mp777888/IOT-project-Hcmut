@@ -34,7 +34,7 @@ import java.util.Date;
 @Service
 public class AuthenticateService {
     UserRepository userRepository;
-
+    PasswordEncoder passwordEncoder;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -44,6 +44,7 @@ public class AuthenticateService {
     public AuthenResponse login(AuthenRequest requests) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
+        //can check email instead of username?
         User user = userRepository.findByUsername(requests.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -56,21 +57,21 @@ public class AuthenticateService {
                 .build();
     }
 
-//    public AuthenResponse authenticate(String email,String name,String id) {
-//        if(userRepository.findById(id).isEmpty()) {
-//            User user = User.builder()
-//                    .id(id)
-//                    .name(name)
-//                    .email(email)
-//                    .build();
-//            userRepository.save(user);
-//        }
-//
-//        String token = generateToken(email);
-//        return AuthenResponse.builder()
-//                .token(token)
-//                .build();
-//    }
+    public AuthenResponse authenticateByGoogle(String email) {
+        if(userRepository.findByEmail(email).isEmpty()){
+            User user = User.builder()
+                    .email(email)
+                    .username(email)
+                    .password(passwordEncoder.encode("123456"))
+                    .build();
+            userRepository.save(user);
+        }
+
+        String token = generateToken(email);
+        return AuthenResponse.builder()
+                .token(token)
+                .build();
+    }
 
 
 
