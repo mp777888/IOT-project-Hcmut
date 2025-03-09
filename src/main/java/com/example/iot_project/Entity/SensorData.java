@@ -14,4 +14,6 @@ public class SensorData {
     private String feedName;
     private String value;
     private long timestamp;
+
+    private Double numericValue;
 }
