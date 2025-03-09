@@ -4,7 +4,7 @@ import com.example.iot_project.DTO.Request.AuthenRequest;
 import com.example.iot_project.DTO.Request.IntrospectRequest;
 import com.example.iot_project.DTO.Response.AuthenResponse;
 import com.example.iot_project.DTO.Response.IntrospectResponse;
-import com.example.iot_project.Enity.User;
+import com.example.iot_project.Entity.User;
 import com.example.iot_project.Exception.AppException;
 import com.example.iot_project.Exception.ErrorCode;
 import com.example.iot_project.Repository.UserRepository;

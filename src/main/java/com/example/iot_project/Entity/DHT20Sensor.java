@@ -1,5 +1,4 @@
-package com.example.iot_project.Enity;
-
+package com.example.iot_project.Entity;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,6 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SoilMoistureSensor extends Device{
-    double soilMoisture;
+public class DHT20Sensor extends Device{
+    double temperature;
+    double humidity;
+
 }

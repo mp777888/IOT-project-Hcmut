@@ -1,4 +1,4 @@
-package com.example.iot_project.Enity;
+package com.example.iot_project.Entity;
 
 
 import lombok.*;

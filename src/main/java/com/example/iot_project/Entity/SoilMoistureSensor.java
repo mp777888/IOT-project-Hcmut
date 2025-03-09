@@ -1,21 +1,18 @@
-package com.example.iot_project.Enity;
+package com.example.iot_project.Entity;
+
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.annotation.Id;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
-
-import java.util.Date;
 
 @Document
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class InvalidToken {
-    @Id
-    String Id;
-    Date expiredDate;
+public class SoilMoistureSensor extends Device{
+    double soilMoisture;
 }

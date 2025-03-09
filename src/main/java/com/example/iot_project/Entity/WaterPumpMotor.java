@@ -1,4 +1,4 @@
-package com.example.iot_project.Enity;
+package com.example.iot_project.Entity;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RelaySwitch extends Device{
-    String device;
+public class WaterPumpMotor extends Device{
+    double flowRate;
+    double waterLevel;
 }
