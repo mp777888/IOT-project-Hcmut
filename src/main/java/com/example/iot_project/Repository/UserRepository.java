@@ -1,6 +1,6 @@
 package com.example.iot_project.Repository;
 
-import com.example.iot_project.Enity.User;
+import com.example.iot_project.Entity.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

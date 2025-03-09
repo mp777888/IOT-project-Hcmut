@@ -3,7 +3,7 @@ package com.example.iot_project.Service;
 import com.example.iot_project.DTO.Request.UserCreateRequest;
 import com.example.iot_project.DTO.Request.UserUpdateRequest;
 import com.example.iot_project.DTO.Response.UserResponse;
-import com.example.iot_project.Enity.User;
+import com.example.iot_project.Entity.User;
 import com.example.iot_project.Exception.AppException;
 import com.example.iot_project.Exception.ErrorCode;
 import com.example.iot_project.Mapper.UserMapper;
@@ -12,13 +12,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
