@@ -11,6 +11,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -35,7 +36,7 @@ public class AdafruitService {
             SensorData.SensorDataBuilder builder = SensorData.builder()
                     .feedName(feedName)
                     .value(payload)
-                    .timestamp(System.currentTimeMillis());
+                    .timestamp(LocalDate.now());
 
             // Thử chuyển đổi payload thành số nếu có thể
             try {
