@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +29,7 @@ public class AdafruitService {
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public void handleMessage(Message<?> message) {
         try {
-            String topic = message.getHeaders().get("mqtt_receivedTopic").toString();
+            String topic = Objects.requireNonNull(message.getHeaders().get("mqtt_receivedTopic")).toString();
             String payload = message.getPayload().toString();
             String feedName = topic.split("/")[2];
 
