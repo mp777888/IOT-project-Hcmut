@@ -70,7 +70,8 @@ public class Config {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:3001"
+                "http://localhost:3001",
+                "http://localhost:5173"
         ));
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
