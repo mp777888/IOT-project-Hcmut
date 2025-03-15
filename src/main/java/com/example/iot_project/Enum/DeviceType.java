@@ -1,6 +1,5 @@
 package com.example.iot_project.Enum;
 
 public enum DeviceType {
-    Sensor,
-    Actuator
+    SENSOR_DHT20
 }

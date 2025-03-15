@@ -32,7 +32,7 @@ public class MqttConfig {
     @Value("${adafruit.io.mqtt.clientId}")
     private String clientId;
 
-    @Value("${adafruit.io.feeds}")
+    @Value("${adafruit.io.list_feeds}")
     private String[] feeds;
 
     @Bean
