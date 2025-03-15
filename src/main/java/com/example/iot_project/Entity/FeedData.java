@@ -1,20 +1,21 @@
 package com.example.iot_project.Entity;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 
 @Document("sensor_data")
-@Data
+@Setter
+@Getter
 @Builder
-public class SensorData {
+@NoArgsConstructor
+@AllArgsConstructor
+public class FeedData {
     @Id
     private String id;
     private String feedName;
-    private String value;
     private LocalDate timestamp;
 
     private Double numericValue;

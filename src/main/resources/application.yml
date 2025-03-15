@@ -24,12 +24,17 @@ spring:
 # Adafruit IO MQTT Configuration
 adafruit:
   io:
-    username: khoa2004
-    key: aio_QRfr01wCgetW3n7gl7QYsCu7jKzT
+    username: nguyengiapk21
+    key: aio_hRJC19W6Bl5pGHNld8BvNKiLrPeU
     mqtt:
       host: tcp://io.adafruit.com:1883
       clientId: iot-backend-client
-    feeds: led,maybom,cambien1,cambien2
+    list_feeds: output-ledrgb,output-water-pumps,output-relay,input-temperature,input-humidity
+    feeds:
+      led: output-ledrgb
+      maybom: output-water-pumps
+      temperature: input-temperature
+      humidity: input-humidity
 
 
 jwt:

@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,4 +19,7 @@ public class UserCreateRequest {
     String email;
     String firstname;
     String lastname;
+    String gender;
+    String phonenum;
+    LocalDate dob;
 }
