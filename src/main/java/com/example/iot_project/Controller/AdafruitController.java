@@ -1,8 +1,8 @@
 package com.example.iot_project.Controller;
 
-import com.example.iot_project.Entity.SensorData;
+import com.example.iot_project.Entity.FeedData;
 import com.example.iot_project.Exception.ApiResponse;
-import com.example.iot_project.Repository.SensorDataRepository;
+import com.example.iot_project.Repository.FeedDataRepository;
 import com.example.iot_project.Service.AdafruitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +24,11 @@ import java.util.Map;
 public class AdafruitController {
 
     private final AdafruitService adafruitService;
-    private final SensorDataRepository sensorDataRepository;
+    private final FeedDataRepository feedDataRepository;
 
     // Đọc tất cả dữ liệu từ MongoDB với phân trang
     @GetMapping("/data")
-    public ApiResponse<Page<SensorData>> getAllData(
+    public ApiResponse<Page<FeedData>> getAllData(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "timestamp") String sortBy,
@@ -38,12 +38,12 @@ public class AdafruitController {
                 Sort.Direction.ASC : Sort.Direction.DESC;
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
-        Page<SensorData> dataPage = sensorDataRepository.findAll(pageable);
+        Page<FeedData> dataPage = feedDataRepository.findAll(pageable);
 
         log.info("Fetched {} sensor data records (page {}, size {})",
                 dataPage.getNumberOfElements(), page, size);
 
-        return ApiResponse.<Page<SensorData>>builder()
+        return ApiResponse.<Page<FeedData>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Dữ liệu cảm biến được tải thành công")
                 .result(dataPage)
@@ -52,19 +52,19 @@ public class AdafruitController {
 
     // Lấy dữ liệu theo tên feed
     @GetMapping("/data/{feedName}")
-    public ApiResponse<List<SensorData>> getDataByFeed(
+    public ApiResponse<List<FeedData>> getDataByFeed(
             @PathVariable String feedName,
             @RequestParam(defaultValue = "20") int limit) {
 
         // Sử dụng phương thức đã tạo trong repository để lấy dữ liệu mới nhất
-        List<SensorData> data = sensorDataRepository.findByFeedNameOrderByTimestampDesc(feedName)
+        List<FeedData> data = feedDataRepository.findByFeedNameOrderByTimestampDesc(feedName)
                 .stream()
                 .limit(limit)
                 .toList();
 
         log.info("Fetched {} records for feed: {}", data.size(), feedName);
 
-        return ApiResponse.<List<SensorData>>builder()
+        return ApiResponse.<List<FeedData>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Dữ liệu cho feed " + feedName)
                 .result(data)
@@ -73,22 +73,22 @@ public class AdafruitController {
 
     // Lấy dữ liệu trong khoảng thời gian
     @GetMapping("/data/timerange")
-    public ApiResponse<List<SensorData>> getDataByTimeRange(
+    public ApiResponse<List<FeedData>> getDataByTimeRange(
             @RequestParam(required = false) String feedName,
             @RequestParam long startTime,
             @RequestParam long endTime) {
 
-        List<SensorData> data;
+        List<FeedData> data;
         if (feedName != null && !feedName.isEmpty()) {
-            data = sensorDataRepository.findByFeedNameAndTimestampBetween(
+            data = feedDataRepository.findByFeedNameAndTimestampBetween(
                     feedName, startTime, endTime);
             log.info("Fetched {} records for feed: {} in time range", data.size(), feedName);
         } else {
-            data = sensorDataRepository.findByTimestampBetween(startTime, endTime);
+            data = feedDataRepository.findByTimestampBetween(startTime, endTime);
             log.info("Fetched {} records in time range", data.size());
         }
 
-        return ApiResponse.<List<SensorData>>builder()
+        return ApiResponse.<List<FeedData>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Dữ liệu trong khoảng thời gian")
                 .result(data)
@@ -98,15 +98,15 @@ public class AdafruitController {
     // Lấy giá trị mới nhất của tất cả các feeds
     @GetMapping("/latest")
     public ApiResponse<Map<String, Object>> getLatestValues() {
-        List<String> allFeeds = sensorDataRepository.findDistinctFeedNameBy();
+        List<String> allFeeds = feedDataRepository.findDistinctFeedNameBy();
         Map<String, Object> latestValues = new HashMap<>();
 
         for (String feed : allFeeds) {
-            List<SensorData> latestData = sensorDataRepository.findByFeedNameOrderByTimestampDesc(feed);
+            List<FeedData> latestData = feedDataRepository.findByFeedNameOrderByTimestampDesc(feed);
             if (!latestData.isEmpty()) {
-                SensorData latest = latestData.get(0);
+                FeedData latest = latestData.get(0);
                 Map<String, Object> feedData = new HashMap<>();
-                feedData.put("value", latest.getValue());
+//                feedData.put("value", latest.getValue());
                 feedData.put("timestamp", latest.getTimestamp());
                 feedData.put("numericValue", latest.getNumericValue());
                 latestValues.put(feed, feedData);

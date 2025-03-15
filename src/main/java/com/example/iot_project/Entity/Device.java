@@ -7,8 +7,9 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Document
@@ -21,11 +22,12 @@ import java.util.UUID;
 public abstract class Device {
     @Id
     String id = UUID.randomUUID().toString();;
-    String name_device;
+    String feedName;
     Boolean status;
+    @Field("device_type")
     DeviceType type;
     String location;
-    Date timestamp;
+    LocalDate timestamp;
 
 
     @DBRef
