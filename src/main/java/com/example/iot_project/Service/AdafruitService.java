@@ -1,7 +1,7 @@
 package com.example.iot_project.Service;
 
-import com.example.iot_project.Entity.SensorData;
-import com.example.iot_project.Repository.SensorDataRepository;
+import com.example.iot_project.Entity.FeedData;
+import com.example.iot_project.Repository.FeedDataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,11 +20,16 @@ import java.util.Objects;
 @Slf4j
 public class AdafruitService {
 
-    private final SensorDataRepository sensorDataRepository;
+    private final FeedDataRepository feedDataRepository;
     private final MessageChannel mqttOutboundChannel;
+    private final DHT20Service dht20Service;
 
     @Value("${adafruit.io.username}")
     private String username;
+    @Value("${adafruit.io.feeds.temperature}")
+    private String temperatureFeed;
+    @Value("${adafruit.io.feeds.humidity}")
+    private String humidityFeed;
 
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public void handleMessage(Message<?> message) {
@@ -34,9 +39,9 @@ public class AdafruitService {
             String feedName = topic.split("/")[2];
 
             // Xây dựng đối tượng SensorData với trường numericValue nếu có thể parse
-            SensorData.SensorDataBuilder builder = SensorData.builder()
+            FeedData.FeedDataBuilder builder = FeedData.builder()
                     .feedName(feedName)
-                    .value(payload)
+//                    .value(payload)
                     .timestamp(LocalDate.now());
 
             // Thử chuyển đổi payload thành số nếu có thể
@@ -48,8 +53,15 @@ public class AdafruitService {
                 log.debug("Payload không phải số: {}", payload);
             }
 
-            SensorData sensorData = builder.build();
-            sensorDataRepository.save(sensorData);
+            FeedData feedData = builder.build();
+            feedDataRepository.save(feedData);
+
+            if (feedName.equals(temperatureFeed)) {
+                dht20Service.updateTemperature(payload);
+            }
+            else if (feedName.equals(humidityFeed)) {
+                dht20Service.updateHumidity(payload);
+            }
 
             log.info("Đã lưu vào MongoDB - Feed: {}, Value: {}", feedName, payload);
         } catch (Exception e) {
@@ -67,11 +79,11 @@ public class AdafruitService {
     }
 
     // Thêm các phương thức tiện ích để truy vấn dữ liệu
-    public List<SensorData> getLatestDataForFeed(String feedName) {
-        return sensorDataRepository.findByFeedNameOrderByTimestampDesc(feedName);
+    public List<FeedData> getLatestDataForFeed(String feedName) {
+        return feedDataRepository.findByFeedNameOrderByTimestampDesc(feedName);
     }
 
-    public List<SensorData> getDataByTimeRange(String feedName, long startTime, long endTime) {
-        return sensorDataRepository.findByFeedNameAndTimestampBetween(feedName, startTime, endTime);
+    public List<FeedData> getDataByTimeRange(String feedName, long startTime, long endTime) {
+        return feedDataRepository.findByFeedNameAndTimestampBetween(feedName, startTime, endTime);
     }
 }
