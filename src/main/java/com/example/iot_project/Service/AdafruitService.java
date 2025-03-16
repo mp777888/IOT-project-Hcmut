@@ -12,6 +12,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,7 +43,7 @@ public class AdafruitService {
             FeedData.FeedDataBuilder builder = FeedData.builder()
                     .feedName(feedName)
 //                    .value(payload)
-                    .timestamp(LocalDate.now());
+                    .timestamp(LocalDateTime.now());
 
             // Thử chuyển đổi payload thành số nếu có thể
             try {

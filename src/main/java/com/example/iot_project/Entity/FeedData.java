@@ -4,9 +4,9 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@Document("sensor_data")
+@Document("feed_data")
 @Setter
 @Getter
 @Builder
@@ -16,7 +16,7 @@ public class FeedData {
     @Id
     private String id;
     private String feedName;
-    private LocalDate timestamp;
+    private LocalDateTime timestamp;
 
     private Double numericValue;
 }

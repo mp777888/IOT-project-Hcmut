@@ -43,7 +43,7 @@ public class MqttConfig {
         options.setUserName(username);
         options.setPassword(key.toCharArray());
         options.setCleanSession(true);
-        options.setKeepAliveInterval(30); // Kiểm tra kết nối mỗi 30 giây
+        options.setKeepAliveInterval(60); // Kiểm tra kết nối mỗi 60 giây
         options.setAutomaticReconnect(true); // Tự động kết nối lại khi mất kết nối
         factory.setConnectionOptions(options);
         return factory;
@@ -68,7 +68,7 @@ public class MqttConfig {
         adapter.setConverter(new DefaultPahoMessageConverter());
         adapter.setQos(1); // Đảm bảo tin nhắn được gửi ít nhất một lần
         adapter.setOutputChannel(mqttInputChannel());
-
+        adapter.setErrorChannel(new DirectChannel()); // Thêm kênh lỗi
         log.info("Đã cấu hình MQTT inbound adapter với các topics: {}", String.join(", ", topics));
         return adapter;
     }
