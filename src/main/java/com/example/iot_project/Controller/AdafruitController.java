@@ -6,6 +6,7 @@ import com.example.iot_project.Repository.FeedDataRepository;
 import com.example.iot_project.Service.AdafruitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,12 @@ public class AdafruitController {
 
     private final AdafruitService adafruitService;
     private final FeedDataRepository feedDataRepository;
+
+    @Value("${adafruit.io.feeds.temperature}")
+    private String temperatureFeed;
+
+    @Value("${adafruit.io.feeds.humidity}")
+    private String humidityFeed;
 
     // Đọc tất cả dữ liệu từ MongoDB với phân trang
     @GetMapping("/data")
@@ -67,6 +74,43 @@ public class AdafruitController {
         return ApiResponse.<List<FeedData>>builder()
                 .code(HttpStatus.OK.value())
                 .message("Dữ liệu cho feed " + feedName)
+                .result(data)
+                .build();
+    }
+
+    @GetMapping("/data/temperature")
+    public ApiResponse<List<FeedData>> getTemperatureData(
+            @RequestParam(defaultValue = "20") int limit) {
+
+        List<FeedData> data = feedDataRepository.findByFeedNameOrderByTimestampDesc(temperatureFeed)
+                .stream()
+                .limit(limit)
+                .toList();
+
+        log.info("Fetched {} records for feed: {}", data.size(), temperatureFeed);
+
+        return ApiResponse.<List<FeedData>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Dữ liệu nhiệt độ từ feed " + temperatureFeed)
+                .result(data)
+                .build();
+    }
+
+
+    @GetMapping("/data/humidity")
+    public ApiResponse<List<FeedData>> getHumidityData(
+            @RequestParam(defaultValue = "20") int limit) {
+
+        List<FeedData> data = feedDataRepository.findByFeedNameOrderByTimestampDesc(humidityFeed)
+                .stream()
+                .limit(limit)
+                .toList();
+
+        log.info("Fetched {} records for feed: {}", data.size(), humidityFeed);
+
+        return ApiResponse.<List<FeedData>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Dữ liệu độ ẩm từ feed " + humidityFeed)
                 .result(data)
                 .build();
     }
