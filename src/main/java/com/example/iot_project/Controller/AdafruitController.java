@@ -39,6 +39,15 @@ public class AdafruitController {
     @Value("${adafruit.io.feeds.light}")
     private String lightFeed;
 
+    @Value("${adafruit.io.feeds.waterPump}")
+    private String waterPumpFeed;
+
+    @Value("${adafruit.io.feeds.led}")
+    private String ledFeed;
+
+    @Value("${adafruit.io.feeds.relay}")
+    private String relayFeed;
+
     // Đọc tất cả dữ liệu từ MongoDB với phân trang
     @GetMapping("/data")
     public ApiResponse<Page<FeedData>> getAllData(
@@ -202,24 +211,29 @@ public class AdafruitController {
                 .build();
     }
 
-
-    // Gửi lệnh đến Adafruit IO (ví dụ: bật/tắt LED)
-    @PostMapping("/control/{feedName}")
-    public ApiResponse<String> controlDevice(
-            @PathVariable String feedName,
+    // Điều khiển máy bơm nước (water-pump), chỉ nhận giá trị 0 hoặc 1
+    @PostMapping("/control/water-pump")
+    public ApiResponse<String> controlWaterPump(
             @RequestParam String value) {
-
         try {
-            adafruitService.publishToFeed(feedName, value);
-            log.info("Command sent to feed: {}, value: {}", feedName, value);
+            // Kiểm tra giá trị hợp lệ: 0 hoặc 1
+            if (!value.equals("0") && !value.equals("1")) {
+                return ApiResponse.<String>builder()
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message("Giá trị không hợp lệ. Chỉ nhận 0 (tắt) hoặc 1 (bật) cho máy bơm.")
+                        .build();
+            }
+
+            adafruitService.publishToFeed(waterPumpFeed, value);
+            log.info("Command sent to water pump (feed: {}), value: {}", waterPumpFeed, value);
 
             return ApiResponse.<String>builder()
                     .code(HttpStatus.OK.value())
                     .message("Lệnh đã được gửi thành công")
-                    .result("Đã gửi lệnh đến " + feedName + " với giá trị: " + value)
+                    .result("Đã gửi lệnh đến máy bơm với giá trị: " + value)
                     .build();
         } catch (Exception e) {
-            log.error("Error sending command to feed: {}, value: {}", feedName, value, e);
+            log.error("Error sending command to water pump (feed: {}), value: {}", waterPumpFeed, value, e);
 
             return ApiResponse.<String>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
@@ -227,6 +241,71 @@ public class AdafruitController {
                     .build();
         }
     }
+
+    // Điều khiển relay (output-relay), chỉ nhận giá trị 0 hoặc 1
+    @PostMapping("/control/relay")
+    public ApiResponse<String> controlRelay(
+            @RequestParam String value) {
+        try {
+            // Kiểm tra giá trị hợp lệ: 0 hoặc 1
+            if (!value.equals("0") && !value.equals("1")) {
+                return ApiResponse.<String>builder()
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message("Giá trị không hợp lệ. Chỉ nhận 0 (tắt) hoặc 1 (bật) cho relay.")
+                        .build();
+            }
+
+            adafruitService.publishToFeed(relayFeed, value);
+            log.info("Command sent to relay (feed: {}), value: {}", relayFeed, value);
+
+            return ApiResponse.<String>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lệnh đã được gửi thành công")
+                    .result("Đã gửi lệnh đến relay với giá trị: " + value)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error sending command to relay (feed: {}), value: {}", relayFeed, value, e);
+
+            return ApiResponse.<String>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lỗi khi gửi lệnh: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    // Điều khiển LED (output-led), chỉ nhận giá trị red, white, green, blue
+    @PostMapping("/control/led")
+    public ApiResponse<String> controlLed(
+            @RequestParam String value) {
+        try {
+            // Kiểm tra giá trị hợp lệ: red, white, green, blue
+            Set<String> validColors = Set.of("red", "white", "green", "blue");
+            if (!validColors.contains(value.toLowerCase())) {
+                return ApiResponse.<String>builder()
+                        .code(HttpStatus.BAD_REQUEST.value())
+                        .message("Giá trị không hợp lệ. Chỉ nhận red, white, green, blue cho LED.")
+                        .build();
+            }
+
+            adafruitService.publishToFeed(ledFeed, value.toLowerCase());
+            log.info("Command sent to LED (feed: {}), value: {}", ledFeed, value);
+
+            return ApiResponse.<String>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Lệnh đã được gửi thành công")
+                    .result("Đã gửi lệnh đến LED với màu: " + value)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error sending command to LED (feed: {}), value: {}", ledFeed, value, e);
+
+            return ApiResponse.<String>builder()
+                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                    .message("Lỗi khi gửi lệnh: " + e.getMessage())
+                    .build();
+        }
+    }
+
+
 
     // Thêm endpoint nhận nhiều lệnh cùng lúc (hữu ích cho điều khiển nhiều thiết bị)
     @PostMapping("/control-multiple")
