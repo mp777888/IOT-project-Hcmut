@@ -32,7 +32,7 @@ adafruit:
     list_feeds: output-ledrgb,output-water-pumps,output-relay,input-temperature,input-humidity,input-soiMoisture,input-light
     feeds:
       led: output-ledrgb
-      maybom: output-water-pumps
+      waterPump: output-water-pumps
       relay: output-relay
       temperature: input-temperature
       humidity: input-humidity
