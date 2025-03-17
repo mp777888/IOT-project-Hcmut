@@ -35,6 +35,9 @@ adafruit:
       maybom: output-water-pumps
       temperature: input-temperature
       humidity: input-humidity
+      relay: output-relay
+      soiMoisture: input-soiMoisture
+      light: input-light
 
 
 jwt:
