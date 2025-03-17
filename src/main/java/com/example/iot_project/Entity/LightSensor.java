@@ -6,6 +6,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Document
 @Setter
 @Getter
@@ -14,5 +16,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LightSensor extends Device{
-    double lightIntensity;
+    Double lightIntensity;
+    LocalDateTime lastLightIntensityUpdate;
 }
