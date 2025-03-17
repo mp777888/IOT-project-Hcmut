@@ -17,6 +17,5 @@ public class FeedData {
     private String id;
     private String feedName;
     private LocalDateTime timestamp;
-
     private Double numericValue;
 }

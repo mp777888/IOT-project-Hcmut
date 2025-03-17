@@ -1,5 +1,6 @@
 package com.example.iot_project.Controller;
 
+import com.example.iot_project.DTO.Response.LatestResponse;
 import com.example.iot_project.Entity.FeedData;
 import com.example.iot_project.Exception.ApiResponse;
 import com.example.iot_project.Repository.FeedDataRepository;
@@ -14,9 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @RequestMapping("/adafruit")
@@ -32,6 +32,12 @@ public class AdafruitController {
 
     @Value("${adafruit.io.feeds.humidity}")
     private String humidityFeed;
+
+    @Value("${adafruit.io.feeds.soilMoisture}")
+    private String soilMoistureFeed;
+
+    @Value("${adafruit.io.feeds.light}")
+    private String lightFeed;
 
     // Đọc tất cả dữ liệu từ MongoDB với phân trang
     @GetMapping("/data")
@@ -141,30 +147,61 @@ public class AdafruitController {
 
     // Lấy giá trị mới nhất của tất cả các feeds
     @GetMapping("/latest")
-    public ApiResponse<Map<String, Object>> getLatestValues() {
-        List<String> allFeeds = feedDataRepository.findDistinctFeedNameBy();
-        Map<String, Object> latestValues = new HashMap<>();
+    public ApiResponse<LatestResponse> getLatestValues() {
+        // Khởi tạo giá trị mặc định cho LatestResponse
+        LatestResponse.LatestResponseBuilder responseBuilder = LatestResponse.builder()
+                .temperature(0.0)
+                .lastTemperatureUpdate(null)
+                .humidity(0.0)
+                .lastHumidityUpdate(null)
+                .lightIntensity(0.0)
+                .lastLightIntensityUpdate(null)
+                .soilMoisture(0.0)
+                .lastSoilMoistureUpdate(null);
 
-        for (String feed : allFeeds) {
-            List<FeedData> latestData = feedDataRepository.findByFeedNameOrderByTimestampDesc(feed);
-            if (!latestData.isEmpty()) {
-                FeedData latest = latestData.get(0);
-                Map<String, Object> feedData = new HashMap<>();
-//                feedData.put("value", latest.getValue());
-                feedData.put("timestamp", latest.getTimestamp());
-                feedData.put("numericValue", latest.getNumericValue());
-                latestValues.put(feed, feedData);
-            }
+        // Lấy dữ liệu mới nhất từ feed input-temperature
+        List<FeedData> temperatureData = feedDataRepository.findByFeedNameOrderByTimestampDesc(temperatureFeed);
+        if (!temperatureData.isEmpty()) {
+            FeedData latest = temperatureData.getFirst();
+            responseBuilder.temperature(latest.getNumericValue() != null ? latest.getNumericValue() : 0.0);
+            responseBuilder.lastTemperatureUpdate(latest.getTimestamp());
         }
 
-        log.info("Fetched latest values for {} feeds", latestValues.size());
+        // Lấy dữ liệu mới nhất từ feed input-humidity
+        List<FeedData> humidityData = feedDataRepository.findByFeedNameOrderByTimestampDesc(humidityFeed);
+        if (!humidityData.isEmpty()) {
+            FeedData latest = humidityData.getFirst();
+            responseBuilder.humidity(latest.getNumericValue() != null ? latest.getNumericValue() : 0.0);
+            responseBuilder.lastHumidityUpdate(latest.getTimestamp());
+        }
 
-        return ApiResponse.<Map<String, Object>>builder()
+        // Lấy dữ liệu mới nhất từ feed input-soilMoisture
+        List<FeedData> soilMoistureData = feedDataRepository.findByFeedNameOrderByTimestampDesc(soilMoistureFeed);
+        if (!soilMoistureData.isEmpty()) {
+            FeedData latest = soilMoistureData.getFirst();
+            responseBuilder.soilMoisture(latest.getNumericValue() != null ? latest.getNumericValue() : 0.0);
+            responseBuilder.lastSoilMoistureUpdate(latest.getTimestamp());
+        }
+
+        // Lấy dữ liệu mới nhất từ feed input-light
+        List<FeedData> lightData = feedDataRepository.findByFeedNameOrderByTimestampDesc(lightFeed);
+        if (!lightData.isEmpty()) {
+            FeedData latest = lightData.getFirst();
+            responseBuilder.lightIntensity(latest.getNumericValue() != null ? latest.getNumericValue() : 0.0);
+            responseBuilder.lastLightIntensityUpdate(latest.getTimestamp());
+        }
+
+        LatestResponse response = responseBuilder.build();
+        log.info("Fetched latest values: temperature={}, humidity={}, soilMoisture={}, lightIntensity={}",
+                response.getTemperature(), response.getHumidity(), response.getSoilMoisture(), response.getLightIntensity());
+
+        return ApiResponse.<LatestResponse>builder()
                 .code(HttpStatus.OK.value())
-                .message("Giá trị mới nhất của các feeds")
-                .result(latestValues)
+                .message("Giá trị mới nhất của các cảm biến")
+                .result(response)
                 .build();
     }
+
 
     // Gửi lệnh đến Adafruit IO (ví dụ: bật/tắt LED)
     @PostMapping("/control/{feedName}")
