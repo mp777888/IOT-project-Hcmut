@@ -16,6 +16,8 @@ import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
+import java.util.UUID;
+
 @Configuration
 @Slf4j
 public class MqttConfig {
@@ -30,7 +32,7 @@ public class MqttConfig {
     private String host;
 
     @Value("${adafruit.io.mqtt.clientId}")
-    private String clientId;
+    private String clientIdBase;
 
     @Value("${adafruit.io.list_feeds}")
     private String[] feeds;
@@ -62,6 +64,8 @@ public class MqttConfig {
             topics[i] = username + "/feeds/" + feeds[i];
         }
 
+        String clientId = clientIdBase + "-" + UUID.randomUUID().toString().substring(0, 8);
+        log.info("Generated dynamic clientId: {}", clientId);
         MqttPahoMessageDrivenChannelAdapter adapter =
                 new MqttPahoMessageDrivenChannelAdapter(clientId + "_inbound", mqttClientFactory(), topics);
         adapter.setCompletionTimeout(5000);
@@ -84,6 +88,7 @@ public class MqttConfig {
     @Bean
     @ServiceActivator(inputChannel = "mqttOutboundChannel")
     public MessageHandler mqttOutbound() {
+        String clientId = clientIdBase + "-" + UUID.randomUUID().toString().substring(0, 8);
         MqttPahoMessageHandler messageHandler = new MqttPahoMessageHandler(clientId + "_outbound", mqttClientFactory());
         messageHandler.setAsync(true);
         messageHandler.setDefaultQos(1);
