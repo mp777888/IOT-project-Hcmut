@@ -12,6 +12,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,7 +43,7 @@ public class AdafruitService {
             FeedData.FeedDataBuilder builder = FeedData.builder()
                     .feedName(feedName)
 //                    .value(payload)
-                    .timestamp(LocalDate.now());
+                    .timestamp(LocalDateTime.now());
 
             // Thử chuyển đổi payload thành số nếu có thể
             try {
@@ -56,12 +57,12 @@ public class AdafruitService {
             FeedData feedData = builder.build();
             feedDataRepository.save(feedData);
 
-            if (feedName.equals(temperatureFeed)) {
-                dht20Service.updateTemperature(payload);
-            }
-            else if (feedName.equals(humidityFeed)) {
-                dht20Service.updateHumidity(payload);
-            }
+//            if (feedName.equals(temperatureFeed)) {
+//                dht20Service.updateTemperature(payload);
+//            }
+//            else if (feedName.equals(humidityFeed)) {
+//                dht20Service.updateHumidity(payload);
+//            }
 
             log.info("Đã lưu vào MongoDB - Feed: {}, Value: {}", feedName, payload);
         } catch (Exception e) {
@@ -78,12 +79,4 @@ public class AdafruitService {
         log.info("Đã gửi lên Adafruit IO - Topic: {}, Value: {}", topic, value);
     }
 
-    // Thêm các phương thức tiện ích để truy vấn dữ liệu
-    public List<FeedData> getLatestDataForFeed(String feedName) {
-        return feedDataRepository.findByFeedNameOrderByTimestampDesc(feedName);
-    }
-
-    public List<FeedData> getDataByTimeRange(String feedName, long startTime, long endTime) {
-        return feedDataRepository.findByFeedNameAndTimestampBetween(feedName, startTime, endTime);
-    }
 }

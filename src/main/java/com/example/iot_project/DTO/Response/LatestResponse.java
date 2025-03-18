@@ -1,22 +1,22 @@
-package com.example.iot_project.Entity;
+package com.example.iot_project.DTO.Response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.SuperBuilder;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Document
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class DHT20Sensor extends Device{
+public class LatestResponse {
     Double temperature;
-    Double humidity;
     LocalDateTime lastTemperatureUpdate;
+    Double humidity;
     LocalDateTime lastHumidityUpdate;
+    Double lightIntensity;
+    LocalDateTime lastLightIntensityUpdate;
+    Double soilMoisture;
+    LocalDateTime lastSoilMoistureUpdate;
 }
