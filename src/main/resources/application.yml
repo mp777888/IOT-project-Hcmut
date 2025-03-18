@@ -24,8 +24,8 @@ spring:
 # Adafruit IO MQTT Configuration
 adafruit:
   io:
-    username: khoa2004
-    key: aio_jgxC34gJPX5YqUDD5ZTkKQUEbzhd
+    username: nguyengiapk21
+    key: aio_hRJC19W6Bl5pGHNld8BvNKiLrPeU
     mqtt:
       host: tcp://io.adafruit.com:1883
       clientId: iot-backend-client-spring
