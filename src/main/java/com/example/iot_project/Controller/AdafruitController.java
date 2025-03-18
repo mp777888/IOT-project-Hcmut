@@ -72,27 +72,6 @@ public class AdafruitController {
                 .build();
     }
 
-    // Lấy dữ liệu theo tên feed
-    @GetMapping("/data/{feedName}")
-    public ApiResponse<List<FeedData>> getDataByFeed(
-            @PathVariable String feedName,
-            @RequestParam(defaultValue = "20") int limit) {
-
-        // Sử dụng phương thức đã tạo trong repository để lấy dữ liệu mới nhất
-        List<FeedData> data = feedDataRepository.findByFeedNameOrderByTimestampDesc(feedName)
-                .stream()
-                .limit(limit)
-                .toList();
-
-        log.info("Fetched {} records for feed: {}", data.size(), feedName);
-
-        return ApiResponse.<List<FeedData>>builder()
-                .code(HttpStatus.OK.value())
-                .message("Dữ liệu cho feed " + feedName)
-                .result(data)
-                .build();
-    }
-
     @GetMapping("/data/temperature")
     public ApiResponse<List<FeedData>> getTemperatureData(
             @RequestParam(defaultValue = "20") int limit) {
@@ -130,19 +109,56 @@ public class AdafruitController {
                 .build();
     }
 
+    @GetMapping("/data/soil-moisture")
+    public ApiResponse<List<FeedData>> getSoilMoistureData(
+            @RequestParam(defaultValue = "20") int limit) {
+
+        List<FeedData> data = feedDataRepository.findByFeedNameOrderByTimestampDesc(soilMoistureFeed)
+                .stream()
+                .limit(limit)
+                .toList();
+
+        log.info("Fetched {} records for feed: {}", data.size(), soilMoistureFeed);
+
+        return ApiResponse.<List<FeedData>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Dữ liệu độ ẩm đất từ feed " + soilMoistureFeed)
+                .result(data)
+                .build();
+    }
+
+    @GetMapping("/data/light")
+    public ApiResponse<List<FeedData>> getLightData(
+            @RequestParam(defaultValue = "20") int limit) {
+
+        List<FeedData> data = feedDataRepository.findByFeedNameOrderByTimestampDesc(lightFeed)
+                .stream()
+                .limit(limit)
+                .toList();
+
+        log.info("Fetched {} records for feed: {}", data.size(), lightFeed);
+
+        return ApiResponse.<List<FeedData>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Dữ liệu ánh sáng từ feed " + lightFeed)
+                .result(data)
+                .build();
+    }
+
     // Lấy dữ liệu trong khoảng thời gian
     @GetMapping("/data/timerange")
     public ApiResponse<List<FeedData>> getDataByTimeRange(
             @RequestParam(required = false) String feedName,
-            @RequestParam long startTime,
-            @RequestParam long endTime) {
+            @RequestParam LocalDateTime startTime,
+            @RequestParam LocalDateTime endTime) {
 
         List<FeedData> data;
         if (feedName != null && !feedName.isEmpty()) {
             data = feedDataRepository.findByFeedNameAndTimestampBetween(
                     feedName, startTime, endTime);
             log.info("Fetched {} records for feed: {} in time range", data.size(), feedName);
-        } else {
+        }
+        else {
             data = feedDataRepository.findByTimestampBetween(startTime, endTime);
             log.info("Fetched {} records in time range", data.size());
         }

@@ -79,12 +79,4 @@ public class AdafruitService {
         log.info("Đã gửi lên Adafruit IO - Topic: {}, Value: {}", topic, value);
     }
 
-    // Thêm các phương thức tiện ích để truy vấn dữ liệu
-    public List<FeedData> getLatestDataForFeed(String feedName) {
-        return feedDataRepository.findByFeedNameOrderByTimestampDesc(feedName);
-    }
-
-    public List<FeedData> getDataByTimeRange(String feedName, long startTime, long endTime) {
-        return feedDataRepository.findByFeedNameAndTimestampBetween(feedName, startTime, endTime);
-    }
 }
