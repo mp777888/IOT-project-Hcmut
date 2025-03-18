@@ -29,14 +29,14 @@ adafruit:
     mqtt:
       host: tcp://io.adafruit.com:1883
       clientId: iot-backend-client-spring
-    list_feeds: output-ledrgb,output-water-pumps,output-relay,input-temperature,input-humidity,input-soiMoisture,input-light
+    list_feeds: output-ledrgb,output-water-pumps,output-relay,input-temperature,input-humidity,input-soi-moisture,input-light
     feeds:
       led: output-ledrgb
       waterPump: output-water-pumps
       relay: output-relay
       temperature: input-temperature
       humidity: input-humidity
-      soilMoisture: input-soiMoisture
+      soilMoisture: input-soi-moisture
       light: input-light
 
 

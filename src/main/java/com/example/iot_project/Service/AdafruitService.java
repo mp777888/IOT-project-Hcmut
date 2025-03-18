@@ -57,12 +57,12 @@ public class AdafruitService {
             FeedData feedData = builder.build();
             feedDataRepository.save(feedData);
 
-            if (feedName.equals(temperatureFeed)) {
-                dht20Service.updateTemperature(payload);
-            }
-            else if (feedName.equals(humidityFeed)) {
-                dht20Service.updateHumidity(payload);
-            }
+//            if (feedName.equals(temperatureFeed)) {
+//                dht20Service.updateTemperature(payload);
+//            }
+//            else if (feedName.equals(humidityFeed)) {
+//                dht20Service.updateHumidity(payload);
+//            }
 
             log.info("Đã lưu vào MongoDB - Feed: {}, Value: {}", feedName, payload);
         } catch (Exception e) {
