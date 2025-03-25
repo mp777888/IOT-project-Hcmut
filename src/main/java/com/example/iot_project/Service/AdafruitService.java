@@ -1,6 +1,7 @@
 package com.example.iot_project.Service;
 
 import com.example.iot_project.Entity.FeedData;
+import com.example.iot_project.Enum.DeviceType;
 import com.example.iot_project.Repository.FeedDataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ public class AdafruitService {
 
     private final FeedDataRepository feedDataRepository;
     private final MessageChannel mqttOutboundChannel;
-    private final DHT20Service dht20Service;
+    private final ThresholdService thresholdService;
 
     @Value("${adafruit.io.username}")
     private String username;
@@ -31,6 +32,10 @@ public class AdafruitService {
     private String temperatureFeed;
     @Value("${adafruit.io.feeds.humidity}")
     private String humidityFeed;
+    @Value("${adafruit.io.feeds.soilMoisture}")
+    private String soilMoistureFeed;
+    @Value("${adafruit.io.feeds.light}")
+    private String lightFeed;
 
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public void handleMessage(Message<?> message) {
@@ -42,12 +47,12 @@ public class AdafruitService {
             // Xây dựng đối tượng SensorData với trường numericValue nếu có thể parse
             FeedData.FeedDataBuilder builder = FeedData.builder()
                     .feedName(feedName)
-//                    .value(payload)
                     .timestamp(LocalDateTime.now());
 
             // Thử chuyển đổi payload thành số nếu có thể
+            Double numericValue = null;
             try {
-                Double numericValue = Double.parseDouble(payload);
+                numericValue = Double.parseDouble(payload);
                 builder.numericValue(numericValue);
             } catch (NumberFormatException e) {
                 // Nếu không chuyển đổi được, để numericValue là null
@@ -58,10 +63,16 @@ public class AdafruitService {
             feedDataRepository.save(feedData);
 
 //            if (feedName.equals(temperatureFeed)) {
-//                dht20Service.updateTemperature(payload);
+//                thresholdService.checkAndNotify(DeviceType.DHT20_TEMPERATURE, numericValue);
 //            }
 //            else if (feedName.equals(humidityFeed)) {
-//                dht20Service.updateHumidity(payload);
+//                thresholdService.checkAndNotify(DeviceType.DHT20_HUMIDITY, numericValue);
+//            }
+//            else if (feedName.equals(soilMoistureFeed)) {
+//                thresholdService.checkAndNotify(DeviceType.SOIL_MOISTURE, numericValue);
+//            }
+//            else if (feedName.equals(lightFeed)) {
+//                thresholdService.checkAndNotify(DeviceType.LIGHT, numericValue);
 //            }
 
             log.info("Đã lưu vào MongoDB - Feed: {}, Value: {}", feedName, payload);
