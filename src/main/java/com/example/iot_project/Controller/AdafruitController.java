@@ -1,10 +1,13 @@
 package com.example.iot_project.Controller;
 
+import com.example.iot_project.DTO.Request.ThresholdRequest;
 import com.example.iot_project.DTO.Response.LatestResponse;
+import com.example.iot_project.DTO.Response.ThresholdResponse;
 import com.example.iot_project.Entity.FeedData;
 import com.example.iot_project.Exception.ApiResponse;
 import com.example.iot_project.Repository.FeedDataRepository;
 import com.example.iot_project.Service.AdafruitService;
+import com.example.iot_project.Service.ThresholdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +29,7 @@ public class AdafruitController {
 
     private final AdafruitService adafruitService;
     private final FeedDataRepository feedDataRepository;
+    private final ThresholdService thresholdService;
 
     @Value("${adafruit.io.feeds.temperature}")
     private String temperatureFeed;
@@ -323,36 +327,51 @@ public class AdafruitController {
 
 
 
-    // Thêm endpoint nhận nhiều lệnh cùng lúc (hữu ích cho điều khiển nhiều thiết bị)
-    @PostMapping("/control-multiple")
-    public ApiResponse<Map<String, String>> controlMultipleDevices(
-            @RequestBody Map<String, String> commands) {
+    // Đặt ngưỡng cho nhiệt độ (DHT20_TEMPERATURE)
+    @PostMapping("/threshold/temperature")
+    public ApiResponse<String> setTemperatureThreshold(
+            @RequestBody ThresholdRequest request) {
+        thresholdService.updateDHT20ThresholdTemperature(request);
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Ngưỡng kích hoạt đã được cập nhật")
+                .result("Đã cập nhật ngưỡng kích hoạt cho nhiệt độ: min=" + request.getMinValue() + ", max=" + request.getMaxValue())
+                .build();
+    }
 
-        Map<String, String> results = new HashMap<>();
+    // Đặt ngưỡng cho độ ẩm (DHT20_HUMIDITY)
+    @PostMapping("/threshold/humidity")
+    public ApiResponse<String> setHumidityThreshold(
+            @RequestBody ThresholdRequest request) {
+        thresholdService.updateDHT20ThresholdHumidity(request);
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Ngưỡng kích hoạt đã được cập nhật")
+                .result("Đã cập nhật ngưỡng kích hoạt cho độ ẩm không khí: min=" + request.getMinValue() + ", max=" + request.getMaxValue())
+                .build();
+    }
 
-        try {
-            for (Map.Entry<String, String> entry : commands.entrySet()) {
-                String feedName = entry.getKey();
-                String value = entry.getValue();
+    // Đặt ngưỡng cho ánh sáng (LIGHT)
+    @PostMapping("/threshold/light")
+    public ApiResponse<String> setLightThreshold(
+            @RequestBody ThresholdRequest request) {
+        thresholdService.updateLightThreshold(request);
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Ngưỡng kích hoạt đã được cập nhật")
+                .result("Đã cập nhật ngưỡng kích hoạt cho ánh sáng: min=" + request.getMinValue() + ", max=" + request.getMaxValue())
+                .build();
+    }
 
-                adafruitService.publishToFeed(feedName, value);
-                results.put(feedName, "Đã gửi giá trị: " + value);
-                log.info("Command sent to feed: {}, value: {}", feedName, value);
-            }
-
-            return ApiResponse.<Map<String, String>>builder()
-                    .code(HttpStatus.OK.value())
-                    .message("Tất cả lệnh đã được gửi thành công")
-                    .result(results)
-                    .build();
-        } catch (Exception e) {
-            log.error("Error sending multiple commands", e);
-
-            return ApiResponse.<Map<String, String>>builder()
-                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .message("Lỗi khi gửi nhiều lệnh: " + e.getMessage())
-                    .result(results)
-                    .build();
-        }
+    // Đặt ngưỡng cho độ ẩm đất (SOIL_MOISTURE)
+    @PostMapping("/threshold/soil")
+    public ApiResponse<String> setSoilMoistureThreshold(
+            @RequestBody ThresholdRequest request) {
+        thresholdService.updateSoilMoistureThreshold(request);
+        return ApiResponse.<String>builder()
+                .code(HttpStatus.OK.value())
+                .message("Ngưỡng kích hoạt đã được cập nhật")
+                .result("Đã cập nhật ngưỡng kích hoạt cho độ ẩm đất: min=" + request.getMinValue() + ", max=" + request.getMaxValue())
+                .build();
     }
 }
