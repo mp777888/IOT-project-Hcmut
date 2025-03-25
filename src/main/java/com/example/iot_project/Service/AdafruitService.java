@@ -62,18 +62,18 @@ public class AdafruitService {
             FeedData feedData = builder.build();
             feedDataRepository.save(feedData);
 
-//            if (feedName.equals(temperatureFeed)) {
-//                thresholdService.checkAndNotify(DeviceType.DHT20_TEMPERATURE, numericValue);
-//            }
-//            else if (feedName.equals(humidityFeed)) {
-//                thresholdService.checkAndNotify(DeviceType.DHT20_HUMIDITY, numericValue);
-//            }
-//            else if (feedName.equals(soilMoistureFeed)) {
-//                thresholdService.checkAndNotify(DeviceType.SOIL_MOISTURE, numericValue);
-//            }
-//            else if (feedName.equals(lightFeed)) {
-//                thresholdService.checkAndNotify(DeviceType.LIGHT, numericValue);
-//            }
+            if (feedName.equals(temperatureFeed)) {
+                thresholdService.checkAndNotify(DeviceType.DHT20_TEMPERATURE, numericValue);
+            }
+            else if (feedName.equals(humidityFeed)) {
+                thresholdService.checkAndNotify(DeviceType.DHT20_HUMIDITY, numericValue);
+            }
+            else if (feedName.equals(soilMoistureFeed)) {
+                thresholdService.checkAndNotify(DeviceType.SOIL_MOISTURE, numericValue);
+            }
+            else if (feedName.equals(lightFeed)) {
+                thresholdService.checkAndNotify(DeviceType.LIGHT, numericValue);
+            }
 
             log.info("Đã lưu vào MongoDB - Feed: {}, Value: {}", feedName, payload);
         } catch (Exception e) {

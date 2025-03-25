@@ -24,7 +24,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: anhkhoabuivu2004@gmail.com
-    password: khoa12042004
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
@@ -39,8 +39,8 @@ app:
 # Adafruit IO MQTT Configuration
 adafruit:
   io:
-    username: nguyengiapk21
-    key: aio_hRJC19W6Bl5pGHNld8BvNKiLrPeU
+    username: khoa2004
+    key: aio_jgxC34gJPX5YqUDD5ZTkKQUEbzhd
     mqtt:
       host: tcp://io.adafruit.com:1883
       clientId: iot-backend-client-spring
