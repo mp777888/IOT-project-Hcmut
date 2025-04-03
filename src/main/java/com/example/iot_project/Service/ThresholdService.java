@@ -1,6 +1,7 @@
 package com.example.iot_project.Service;
 
 import com.example.iot_project.DTO.Request.ThresholdRequest;
+import com.example.iot_project.DTO.Response.ThresholdResponse;
 import com.example.iot_project.Entity.Threshold;
 import com.example.iot_project.Enum.DeviceType;
 import com.example.iot_project.Repository.ThresholdRepository;
@@ -14,7 +15,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ public class ThresholdService {
 
     final ThresholdRepository thresholdRepository;
     final JavaMailSender mailSender;
+    final NotificationService notificationService;
 
 
     @Value("${app.notification.email}")
@@ -96,23 +100,37 @@ public class ThresholdService {
             }
 
             if (currentValue < minValue) {
-                String message = String.format(
-                        "Cảnh báo: Giá trị %s quá thấp! Giá trị hiện tại: %.2f, Ngưỡng tối thiểu: %.2f",
-                        type, currentValue, minValue
-                );
-                sendEmail(message);
+//                String message = String.format(
+//                        "Cảnh báo: Giá trị %s quá thấp! Giá trị hiện tại: %.2f, Ngưỡng tối thiểu: %.2f",
+//                        type, currentValue, minValue
+//                );
+//                sendEmail(message);
                 lastNotificationTimes.put(type, currentTime);
+                notificationService.lowerBoundMessage(type.toString());
                 log.info("Sent notification for {}: currentValue={} is below min={}", type, currentValue, minValue);
-            } else if (currentValue > maxValue) {
-                String message = String.format(
-                        "Cảnh báo: Giá trị %s quá cao! Giá trị hiện tại: %.2f, Ngưỡng tối đa: %.2f",
-                        type, currentValue, maxValue
-                );
-                sendEmail(message);
+            }
+            else if (currentValue > maxValue) {
+//                String message = String.format(
+//                        "Cảnh báo: Giá trị %s quá cao! Giá trị hiện tại: %.2f, Ngưỡng tối đa: %.2f",
+//                        type, currentValue, maxValue
+//                );
+//                sendEmail(message);
                 lastNotificationTimes.put(type, currentTime);
+                notificationService.upperBoundMessage(type.toString());
                 log.info("Sent notification for {}: currentValue={} is above max={}", type, currentValue, maxValue);
             }
         }
+    }
+
+    public List<ThresholdResponse> getAllThresholds() {
+        List<Threshold> thresholds = thresholdRepository.findAll();
+        return thresholds.stream()
+                .map(threshold -> ThresholdResponse.builder()
+                        .deviceType(threshold.getType())
+                        .minValue(threshold.getMinValue())
+                        .maxValue(threshold.getMaxValue())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     // Gửi email thông báo

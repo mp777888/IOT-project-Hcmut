@@ -29,7 +29,6 @@ public class AdafruitController {
 
     private final AdafruitService adafruitService;
     private final FeedDataRepository feedDataRepository;
-    private final ThresholdService thresholdService;
 
     @Value("${adafruit.io.feeds.temperature}")
     private String temperatureFeed;
@@ -323,55 +322,5 @@ public class AdafruitController {
                     .message("Lỗi khi gửi lệnh: " + e.getMessage())
                     .build();
         }
-    }
-
-
-
-    // Đặt ngưỡng cho nhiệt độ (DHT20_TEMPERATURE)
-    @PostMapping("/threshold/temperature")
-    public ApiResponse<String> setTemperatureThreshold(
-            @RequestBody ThresholdRequest request) {
-        thresholdService.updateDHT20ThresholdTemperature(request);
-        return ApiResponse.<String>builder()
-                .code(HttpStatus.OK.value())
-                .message("Ngưỡng kích hoạt đã được cập nhật")
-                .result("Đã cập nhật ngưỡng kích hoạt cho nhiệt độ: min=" + request.getMinValue() + ", max=" + request.getMaxValue())
-                .build();
-    }
-
-    // Đặt ngưỡng cho độ ẩm (DHT20_HUMIDITY)
-    @PostMapping("/threshold/humidity")
-    public ApiResponse<String> setHumidityThreshold(
-            @RequestBody ThresholdRequest request) {
-        thresholdService.updateDHT20ThresholdHumidity(request);
-        return ApiResponse.<String>builder()
-                .code(HttpStatus.OK.value())
-                .message("Ngưỡng kích hoạt đã được cập nhật")
-                .result("Đã cập nhật ngưỡng kích hoạt cho độ ẩm không khí: min=" + request.getMinValue() + ", max=" + request.getMaxValue())
-                .build();
-    }
-
-    // Đặt ngưỡng cho ánh sáng (LIGHT)
-    @PostMapping("/threshold/light")
-    public ApiResponse<String> setLightThreshold(
-            @RequestBody ThresholdRequest request) {
-        thresholdService.updateLightThreshold(request);
-        return ApiResponse.<String>builder()
-                .code(HttpStatus.OK.value())
-                .message("Ngưỡng kích hoạt đã được cập nhật")
-                .result("Đã cập nhật ngưỡng kích hoạt cho ánh sáng: min=" + request.getMinValue() + ", max=" + request.getMaxValue())
-                .build();
-    }
-
-    // Đặt ngưỡng cho độ ẩm đất (SOIL_MOISTURE)
-    @PostMapping("/threshold/soil")
-    public ApiResponse<String> setSoilMoistureThreshold(
-            @RequestBody ThresholdRequest request) {
-        thresholdService.updateSoilMoistureThreshold(request);
-        return ApiResponse.<String>builder()
-                .code(HttpStatus.OK.value())
-                .message("Ngưỡng kích hoạt đã được cập nhật")
-                .result("Đã cập nhật ngưỡng kích hoạt cho độ ẩm đất: min=" + request.getMinValue() + ", max=" + request.getMaxValue())
-                .build();
     }
 }
