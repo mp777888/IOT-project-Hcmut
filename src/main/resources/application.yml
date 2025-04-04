@@ -20,12 +20,27 @@ spring:
                 - email
                 - profile
                 - openid
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: anhkhoabuivu2004@gmail.com
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+app:
+  notification:
+    email: anhkhoabuivu@gmail.com
+
 
 # Adafruit IO MQTT Configuration
 adafruit:
   io:
-    username: nguyengiapk21
-    key: aio_hRJC19W6Bl5pGHNld8BvNKiLrPeU
+    username: khoa2004
+    key: aio_jgxC34gJPX5YqUDD5ZTkKQUEbzhd
     mqtt:
       host: tcp://io.adafruit.com:1883
       clientId: iot-backend-client-spring

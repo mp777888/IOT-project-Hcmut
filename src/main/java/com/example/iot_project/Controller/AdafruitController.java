@@ -1,10 +1,13 @@
 package com.example.iot_project.Controller;
 
+import com.example.iot_project.DTO.Request.ThresholdRequest;
 import com.example.iot_project.DTO.Response.LatestResponse;
+import com.example.iot_project.DTO.Response.ThresholdResponse;
 import com.example.iot_project.Entity.FeedData;
 import com.example.iot_project.Exception.ApiResponse;
 import com.example.iot_project.Repository.FeedDataRepository;
 import com.example.iot_project.Service.AdafruitService;
+import com.example.iot_project.Service.ThresholdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -317,41 +320,6 @@ public class AdafruitController {
             return ApiResponse.<String>builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .message("Lỗi khi gửi lệnh: " + e.getMessage())
-                    .build();
-        }
-    }
-
-
-
-    // Thêm endpoint nhận nhiều lệnh cùng lúc (hữu ích cho điều khiển nhiều thiết bị)
-    @PostMapping("/control-multiple")
-    public ApiResponse<Map<String, String>> controlMultipleDevices(
-            @RequestBody Map<String, String> commands) {
-
-        Map<String, String> results = new HashMap<>();
-
-        try {
-            for (Map.Entry<String, String> entry : commands.entrySet()) {
-                String feedName = entry.getKey();
-                String value = entry.getValue();
-
-                adafruitService.publishToFeed(feedName, value);
-                results.put(feedName, "Đã gửi giá trị: " + value);
-                log.info("Command sent to feed: {}, value: {}", feedName, value);
-            }
-
-            return ApiResponse.<Map<String, String>>builder()
-                    .code(HttpStatus.OK.value())
-                    .message("Tất cả lệnh đã được gửi thành công")
-                    .result(results)
-                    .build();
-        } catch (Exception e) {
-            log.error("Error sending multiple commands", e);
-
-            return ApiResponse.<Map<String, String>>builder()
-                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .message("Lỗi khi gửi nhiều lệnh: " + e.getMessage())
-                    .result(results)
                     .build();
         }
     }
