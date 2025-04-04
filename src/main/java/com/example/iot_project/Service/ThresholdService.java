@@ -100,23 +100,23 @@ public class ThresholdService {
             }
 
             if (currentValue < minValue) {
-//                String message = String.format(
-//                        "Cảnh báo: Giá trị %s quá thấp! Giá trị hiện tại: %.2f, Ngưỡng tối thiểu: %.2f",
-//                        type, currentValue, minValue
-//                );
+                String message = String.format(
+                        "Cảnh báo cho thiết bị " + type.toString() + " : Giá trị %s quá thấp! Giá trị hiện tại: %.2f, Ngưỡng tối thiểu: %.2f",
+                        type, currentValue, minValue
+                );
 //                sendEmail(message);
                 lastNotificationTimes.put(type, currentTime);
-                notificationService.lowerBoundMessage(type.toString());
+                notificationService.lowerBoundMessage(message,type.toString());
                 log.info("Sent notification for {}: currentValue={} is below min={}", type, currentValue, minValue);
             }
             else if (currentValue > maxValue) {
-//                String message = String.format(
-//                        "Cảnh báo: Giá trị %s quá cao! Giá trị hiện tại: %.2f, Ngưỡng tối đa: %.2f",
-//                        type, currentValue, maxValue
-//                );
+                String message = String.format(
+                        "Cảnh báo cho thiết bị " + type.toString() + ": Giá trị %s quá cao! Giá trị hiện tại: %.2f, Ngưỡng tối đa: %.2f",
+                        type, currentValue, maxValue
+                );
 //                sendEmail(message);
                 lastNotificationTimes.put(type, currentTime);
-                notificationService.upperBoundMessage(type.toString());
+                notificationService.upperBoundMessage(message,type.toString());
                 log.info("Sent notification for {}: currentValue={} is above max={}", type, currentValue, maxValue);
             }
         }
