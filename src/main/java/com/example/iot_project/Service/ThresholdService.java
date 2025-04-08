@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class ThresholdService {
 
     final ThresholdRepository thresholdRepository;
-    final JavaMailSender mailSender;
+//    final JavaMailSender mailSender;
     final NotificationService notificationService;
 
 
@@ -52,9 +52,12 @@ public class ThresholdService {
                         .minValue(null)
                         .maxValue(null)
                         .build());
-
-        threshold.setMinValue(minValue);
-        threshold.setMaxValue(maxValue);
+        if(minValue != null){
+            threshold.setMinValue(minValue);
+        }
+        if(maxValue != null){
+            threshold.setMaxValue(maxValue);
+        }
         thresholdRepository.save(threshold);
         log.info("Updated threshold for {}: min={}, max={}", type, minValue, maxValue);
     }
@@ -83,7 +86,7 @@ public class ThresholdService {
     // Kiểm tra giá trị cảm biến và gửi email nếu nằm ngoài khoảng ngưỡng
     public void checkAndNotify(DeviceType type, Double currentValue) {
         Threshold threshold = thresholdRepository.findByType(type).orElse(null);
-        if (threshold == null || threshold.getMinValue() == null || threshold.getMaxValue() == null) {
+        if (threshold == null || (threshold.getMinValue() == null && threshold.getMaxValue() == null)) {
             log.warn("No threshold defined for device type: {}", type);
             return;
         }
@@ -99,7 +102,7 @@ public class ThresholdService {
                 return;
             }
 
-            if (currentValue < minValue) {
+            if (minValue != null && currentValue < minValue) {
                 String message = String.format(
                         "Cảnh báo cho thiết bị " + type.toString() + " : Giá trị %s quá thấp! Giá trị hiện tại: %.2f, Ngưỡng tối thiểu: %.2f",
                         type, currentValue, minValue
@@ -109,7 +112,7 @@ public class ThresholdService {
                 notificationService.lowerBoundMessage(message,type.toString());
                 log.info("Sent notification for {}: currentValue={} is below min={}", type, currentValue, minValue);
             }
-            else if (currentValue > maxValue) {
+            else if (maxValue != null && currentValue > maxValue) {
                 String message = String.format(
                         "Cảnh báo cho thiết bị " + type.toString() + ": Giá trị %s quá cao! Giá trị hiện tại: %.2f, Ngưỡng tối đa: %.2f",
                         type, currentValue, maxValue
@@ -142,7 +145,7 @@ public class ThresholdService {
             mailMessage.setText(message);
             mailMessage.setFrom("anhkhoabuivu2004@gmail.com");
 
-            mailSender.send(mailMessage);
+//            mailSender.send(mailMessage);
             log.info("Email sent to {}: {}", notificationEmail, message);
         } catch (Exception e) {
             log.error("Failed to send email to {}: {}", notificationEmail, e.getMessage(), e);
