@@ -18,7 +18,7 @@ public class UserController {
     private UserService userService;
 
 
-    @PostMapping("/create")
+    @PostMapping
     public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreateRequest request){
         return ApiResponse.<UserResponse>builder()
                 .code(200)
@@ -34,7 +34,7 @@ public class UserController {
                 .build();
     }
 
-    @PutMapping("/update")
+    @PutMapping
     public ApiResponse<UserResponse> updateUser(@RequestBody UserUpdateRequest request){
         return ApiResponse.<UserResponse>builder()
                 .code(200)

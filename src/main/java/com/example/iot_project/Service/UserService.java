@@ -26,9 +26,6 @@ public class UserService {
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
-//    public void updateProfile(UserUpdateRequest request){
-//
-//    }
     public UserResponse createUser(UserCreateRequest request){
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);
