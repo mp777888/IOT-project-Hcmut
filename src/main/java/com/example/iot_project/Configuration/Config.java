@@ -23,10 +23,9 @@ import java.util.*;
 public class Config {
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/user/create",
-            "/login/token",
-            "/login/callback",
-            "/login",
+            "/user",
+            "/auth/token",
+            "/auth/callback",
     };
 
     private CustomJwtDecoder customJwtDecoder;

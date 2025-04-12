@@ -18,8 +18,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
 
-    public void lowerBoundMessage(String device) {
-        String message = "Thiết bị " + device + " đã vượt dưới ngưỡng cho phép";
+    public void lowerBoundMessage(String message,String device) {
         log.info("Lower bound notification sent");
         try{
             notificationRepository.save(Notification.builder()
@@ -32,8 +31,7 @@ public class NotificationService {
         }
     }
 
-    public void upperBoundMessage(String device) {
-        String message = "Thiết bị " + device + " đã vượt trên ngưỡng cho phép";
+    public void upperBoundMessage(String message,String device) {
         log.info("Upper bound notification sent");
         try{
             notificationRepository.save(Notification.builder()
