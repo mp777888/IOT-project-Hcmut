@@ -28,6 +28,16 @@ public class ThresholdService {
     final ThresholdRepository thresholdRepository;
 //    final JavaMailSender mailSender;
     final NotificationService notificationService;
+    final AdafruitService AdafruitService;
+
+    @Value("${adafruit.io.feeds.waterPump}")
+    private String waterPumpFeed;
+
+    @Value("${adafruit.io.feeds.led}")
+    private String ledFeed;
+
+    @Value("${adafruit.io.feeds.relay}")
+    private String relayFeed;
 
 
     @Value("${app.notification.email}")
@@ -124,6 +134,43 @@ public class ThresholdService {
             }
         }
     }
+
+    // Kiểm tra giá trị cảm biến và gửi email nếu nằm ngoài khoảng ngưỡng
+    public void checkAndActivate(DeviceType type, Double currentValue) {
+        Threshold threshold = thresholdRepository.findByType(type).orElse(null);
+        if (threshold == null || threshold.getMinValue() == null || threshold.getMaxValue() == null) {
+            log.warn("No threshold defined for device type: {}", type);
+            return;
+        }
+
+        String deviceFeed;
+
+        if (type == DeviceType.SOIL_MOISTURE || type == DeviceType.DHT20_HUMIDITY) {
+            deviceFeed = waterPumpFeed;
+        } else if (type == DeviceType.LIGHT) {
+            deviceFeed = ledFeed;
+        } else {
+            log.warn("No feed defined for device type: {}", type);
+            return;
+        }
+
+        Double minValue = threshold.getMinValue();
+        Double maxValue = threshold.getMaxValue();
+        if (currentValue != null) {
+            //long currentTime = System.currentTimeMillis();
+            
+
+            if (currentValue < minValue) {
+                AdafruitService.publishToFeed(deviceFeed, (type == DeviceType.LIGHT)? "white" : "1"); // Bật thiết bị
+                log.info("activate {}: currentValue={} is below min={}", deviceFeed, currentValue, minValue);
+            }
+            else if (currentValue > maxValue) {
+                AdafruitService.publishToFeed(deviceFeed, (type == DeviceType.LIGHT)? "black" :"0"); // Tắt thiết bị
+                log.info("Sent notification for {}: currentValue={} is above max={}", deviceFeed, currentValue, maxValue);
+            }
+        }
+    }
+
 
     public List<ThresholdResponse> getAllThresholds() {
         List<Threshold> thresholds = thresholdRepository.findAll();
