@@ -26,6 +26,8 @@ public class Config {
             "/user",
             "/auth/token",
             "/auth/callback",
+            "/auth/logout",
+            "/auth/refresh",
     };
 
     private CustomJwtDecoder customJwtDecoder;

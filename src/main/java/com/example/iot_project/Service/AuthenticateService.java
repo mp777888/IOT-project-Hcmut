@@ -2,11 +2,15 @@ package com.example.iot_project.Service;
 
 import com.example.iot_project.DTO.Request.AuthenRequest;
 import com.example.iot_project.DTO.Request.IntrospectRequest;
+import com.example.iot_project.DTO.Request.LogOutRequest;
+import com.example.iot_project.DTO.Request.RefreshRequest;
 import com.example.iot_project.DTO.Response.AuthenResponse;
 import com.example.iot_project.DTO.Response.IntrospectResponse;
+import com.example.iot_project.Entity.InvalidToken;
 import com.example.iot_project.Entity.User;
 import com.example.iot_project.Exception.AppException;
 import com.example.iot_project.Exception.ErrorCode;
+import com.example.iot_project.Repository.InvalidatedTokenRepository;
 import com.example.iot_project.Repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -27,6 +31,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ import java.util.Date;
 public class AuthenticateService {
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -51,23 +57,23 @@ public class AuthenticateService {
         if (!passwordEncoder.matches(requests.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
         }
-        String token = generateToken(requests.getUsername());
+        String token = generateToken(user);
         return AuthenResponse.builder()
                 .token(token)
                 .build();
     }
 
     public AuthenResponse authenticateByGoogle(String email) {
-        if(userRepository.findByEmail(email).isEmpty()){
-            User user = User.builder()
-                    .email(email)
-                    .username(email)
-                    .password(passwordEncoder.encode("123456"))
-                    .build();
-            userRepository.save(user);
+        if(userRepository.findByEmail(email).isPresent()){
+            throw new AppException(ErrorCode.USER_EXISTED);
         }
-
-        String token = generateToken(email);
+        var user = User.builder()
+                .email(email)
+                .username(email)
+                .password(passwordEncoder.encode("123456"))
+                .build();
+        userRepository.save(user);
+        String token = generateToken(user);
         return AuthenResponse.builder()
                 .token(token)
                 .build();
@@ -78,29 +84,82 @@ public class AuthenticateService {
     public IntrospectResponse introspect(IntrospectRequest request)
             throws JOSEException, ParseException {
         var token = request.getToken();
+        boolean isValid = true;
 
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        try {
+            verifyToken(token);
 
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
+        }catch(AppException e){
+            isValid = false;
+        }
 
         return IntrospectResponse.builder()
-                .valid(verified && expirationTime.after(new Date()))
+                .valid(isValid)
                 .build();
     }
 
-    private String generateToken(String name) {
+    public void logout(LogOutRequest request) throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jit = signToken.getJWTClaimsSet().getJWTID();
+        Date ex = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidToken invalidToken = InvalidToken.builder()
+                .id(jit)
+                .expiredDate(ex)
+                .build();
+        invalidatedTokenRepository.save(invalidToken);
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        Date expirationTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        var verified = signedJWT.verify(verifier);
+        if (!(verified && expirationTime.after(new Date()))) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
+        }
+
+        if(invalidatedTokenRepository
+                .existsById(signedJWT.getJWTClaimsSet().getJWTID())){
+            throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
+        }
+
+        return signedJWT;
+    }
+
+
+    public AuthenResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signedJWT = verifyToken(request.getToken());
+        var jit = signedJWT.getJWTClaimsSet().getJWTID();
+        var ex = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidToken invalidToken = InvalidToken.builder()
+                .id(jit)
+                .expiredDate(ex)
+                .build();
+        invalidatedTokenRepository.save(invalidToken);
+
+        var username = signedJWT.getJWTClaimsSet().getSubject();
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        String token = generateToken(user);
+        return AuthenResponse.builder()
+                .token(token)
+                .build();
+    }
+
+
+    private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                .subject(name) // Sử dụng email làm subject (có thể thay bằng ID người dùng)
+                .subject(user.getUsername())
                 .issuer("iot.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
-                .claim("email", name) // Thêm thông tin email
-                .claim("custom", "demo")
+                .jwtID(UUID.randomUUID().toString())
+                .claim("name", user.getUsername()) // Thêm thông tin email
                 .build();
         Payload payload = new Payload(claimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
