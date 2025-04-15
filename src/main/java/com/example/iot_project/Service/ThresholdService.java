@@ -28,6 +28,16 @@ public class ThresholdService {
     final ThresholdRepository thresholdRepository;
 //    final JavaMailSender mailSender;
     final NotificationService notificationService;
+//    final AdafruitService AdafruitService;
+
+    @Value("${adafruit.io.feeds.waterPump}")
+    private String waterPumpFeed;
+
+    @Value("${adafruit.io.feeds.led}")
+    private String ledFeed;
+
+    @Value("${adafruit.io.feeds.relay}")
+    private String relayFeed;
 
 
     @Value("${app.notification.email}")
@@ -83,7 +93,7 @@ public class ThresholdService {
     }
 
 
-    // Kiểm tra giá trị cảm biến và gửi email nếu nằm ngoài khoảng ngưỡng
+    // Kiểm tra giá trị cảm biến và gửi thông báo nếu nằm ngoài khoảng ngưỡng
     public void checkAndNotify(DeviceType type, Double currentValue) {
         Threshold threshold = thresholdRepository.findByType(type).orElse(null);
         if (threshold == null || (threshold.getMinValue() == null && threshold.getMaxValue() == null)) {
@@ -97,33 +107,75 @@ public class ThresholdService {
             long currentTime = System.currentTimeMillis();
             Long lastNotificationTime = lastNotificationTimes.getOrDefault(type, 0L);
 
-            if (currentTime - lastNotificationTime < NOTIFICATION_COOLDOWN) {
-                log.info("Notification for {} skipped due to cooldown", type);
-                return;
-            }
+            boolean shouldNotify = currentTime - lastNotificationTime >= NOTIFICATION_COOLDOWN;
 
             if (minValue != null && currentValue < minValue) {
-                String message = String.format(
-                        "Cảnh báo cho thiết bị " + type.toString() + " : Giá trị %s quá thấp! Giá trị hiện tại: %.2f, Ngưỡng tối thiểu: %.2f",
-                        type, currentValue, minValue
-                );
-//                sendEmail(message);
-                lastNotificationTimes.put(type, currentTime);
-                notificationService.lowerBoundMessage(message,type.toString());
-                log.info("Sent notification for {}: currentValue={} is below min={}", type, currentValue, minValue);
+                if (shouldNotify) {
+                    String message = String.format(
+                            "Cảnh báo cho thiết bị " + type.toString() + " : Giá trị %s quá thấp! Giá trị hiện tại: %.2f, Ngưỡng tối thiểu: %.2f",
+                            type, currentValue, minValue
+                    );
+                    lastNotificationTimes.put(type, currentTime);
+                    notificationService.lowerBoundMessage(message, type.toString());
+                    log.info("Sent notification for {}: currentValue={} is below min={}", type, currentValue, minValue);
+                }
+                else {
+                    log.info("Notification for {} skipped due to cooldown", type);
+                }
+
+                // Handle device activation for relevant types
+//                if (type == DeviceType.SOIL_MOISTURE || type == DeviceType.DHT20_HUMIDITY || type == DeviceType.LIGHT) {
+//                    String deviceFeed = getDeviceFeedForType(type);
+//                    if (deviceFeed != null) {
+//                        String value = (type == DeviceType.LIGHT) ? "white" : "1";
+//                        AdafruitService.publishToFeed(deviceFeed, value);
+//                        log.info("Activated device {}: currentValue={} is below min={}", deviceFeed, currentValue, minValue);
+//                    }
+//                    else{
+//                        log.warn("No feed defined for device type: {}", type);
+//                    }
+//                }
             }
             else if (maxValue != null && currentValue > maxValue) {
-                String message = String.format(
-                        "Cảnh báo cho thiết bị " + type.toString() + ": Giá trị %s quá cao! Giá trị hiện tại: %.2f, Ngưỡng tối đa: %.2f",
-                        type, currentValue, maxValue
-                );
-//                sendEmail(message);
-                lastNotificationTimes.put(type, currentTime);
-                notificationService.upperBoundMessage(message,type.toString());
-                log.info("Sent notification for {}: currentValue={} is above max={}", type, currentValue, maxValue);
+                if (shouldNotify) {
+                    String message = String.format(
+                            "Cảnh báo cho thiết bị " + type.toString() + ": Giá trị %s quá cao! Giá trị hiện tại: %.2f, Ngưỡng tối đa: %.2f",
+                            type, currentValue, maxValue
+                    );
+                    lastNotificationTimes.put(type, currentTime);
+                    notificationService.upperBoundMessage(message, type.toString());
+                    log.info("Sent notification for {}: currentValue={} is above max={}", type, currentValue, maxValue);
+                }
+                else {
+                    log.info("Notification for {} skipped due to cooldown", type);
+                }
+
+//                if (type == DeviceType.SOIL_MOISTURE || type == DeviceType.DHT20_HUMIDITY || type == DeviceType.LIGHT) {
+//                    String deviceFeed = getDeviceFeedForType(type);
+//                    if (deviceFeed != null) {
+//                        String value = (type == DeviceType.LIGHT) ? "black" : "0";
+//                        AdafruitService.publishToFeed(deviceFeed, value);
+//                        log.info("Deactivated device {}: currentValue={} is above max={}", deviceFeed, currentValue, maxValue);
+//                    }
+//                    else{
+//                        log.warn("No feed defined for device type: {}", type);
+//                    }
+//                }
             }
         }
     }
+
+    private String getDeviceFeedForType(DeviceType type) {
+        if (type == DeviceType.SOIL_MOISTURE || type == DeviceType.DHT20_HUMIDITY) {
+            return waterPumpFeed;
+        } else if (type == DeviceType.LIGHT) {
+            return ledFeed;
+        } else {
+            log.warn("No feed defined for device type: {}", type);
+            return null;
+        }
+    }
+
 
     public List<ThresholdResponse> getAllThresholds() {
         List<Threshold> thresholds = thresholdRepository.findAll();

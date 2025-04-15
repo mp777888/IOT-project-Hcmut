@@ -1,14 +1,19 @@
 package com.example.iot_project.Controller;
 
 import com.example.iot_project.DTO.Request.AuthenRequest;
+import com.example.iot_project.DTO.Request.LogOutRequest;
+import com.example.iot_project.DTO.Request.RefreshRequest;
 import com.example.iot_project.DTO.Response.AuthenResponse;
 import com.example.iot_project.Service.AuthenticateService;
 import com.example.iot_project.Exception.ApiResponse;
+import com.nimbusds.jose.JOSEException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 
 @Slf4j
 @RestController
@@ -26,6 +31,13 @@ public class AuthenController {
                 .build();
     }
 
+    @PostMapping("/logout")
+    public ApiResponse<Void> authenticate(@RequestBody LogOutRequest request) throws ParseException, JOSEException {
+        authenticateService.logout(request);
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .build();
+    }
 
     @GetMapping("/callback")
     public ApiResponse<AuthenResponse> googleLogin(@AuthenticationPrincipal OidcUser oidcUser) {
@@ -51,4 +63,13 @@ public class AuthenController {
     }
 
 
+
+    @PostMapping("/refresh")
+    public ApiResponse<AuthenResponse> refreshToken(@RequestBody RefreshRequest request)
+            throws ParseException, JOSEException {
+        return ApiResponse.<AuthenResponse>builder()
+                .code(200)
+                .result(authenticateService.refreshToken(request))
+                .build();
+    }
 }
