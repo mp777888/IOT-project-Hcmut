@@ -16,6 +16,6 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvalidToken {
     @Id
-    String Id;
+    String id;
     Date expiredDate;
 }
