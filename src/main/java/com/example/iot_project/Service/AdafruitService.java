@@ -67,15 +67,12 @@ public class AdafruitService {
             }
             else if (feedName.equals(humidityFeed)) {
                 thresholdService.checkAndNotify(DeviceType.DHT20_HUMIDITY, numericValue);
-                thresholdService.checkAndActivate(DeviceType.DHT20_HUMIDITY, numericValue);
             }
             else if (feedName.equals(soilMoistureFeed)) {
                 thresholdService.checkAndNotify(DeviceType.SOIL_MOISTURE, numericValue);
-                thresholdService.checkAndActivate(DeviceType.SOIL_MOISTURE, numericValue);
             }
             else if (feedName.equals(lightFeed)) {
                 thresholdService.checkAndNotify(DeviceType.LIGHT, numericValue);
-                thresholdService.checkAndActivate(DeviceType.LIGHT, numericValue);
             }
 
             log.info("Đã lưu vào MongoDB - Feed: {}, Value: {}", feedName, payload);
