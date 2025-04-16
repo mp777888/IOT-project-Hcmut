@@ -4,9 +4,9 @@ spring:
       uri: mongodb+srv://<username>:<password>@<cluster-address>/<database>?retryWrites=true&w=majority
       database: db1
     redis:
-      host: localhost
-      port: 6379
-      timeout: 2000
+      url: ${REDIS_URL}
+      ssl:
+        enabled: true
       lettuce:
         pool:
           max-active: 8

@@ -4,28 +4,30 @@ spring:
       uri: ${MONGODB_URI}
       database: ${MONGODB_DATABASE}
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      timeout: 3000
+      url: ${REDIS_URL}
+      ssl:
+        enabled: true
+      timeout: 5000
       lettuce:
         pool:
-          max-active: 16
+          max-active: 8
           max-idle: 8
-          min-idle: 4
+          min-idle: 0
 
+# Adafruit IO MQTT Configuration
 adafruit:
   io:
     username: ${ADAFRUIT_USERNAME}
     key: ${ADAFRUIT_KEY}
     mqtt:
-      host: tcp://io.adafruit.com:1883
-      clientId: iot-backend-client-prod
-    list_feeds: ${ADAFRUIT_FEEDS_LIST}
+      host: ${ADAFRUIT_MQTT_HOST:tcp://io.adafruit.com:1883}
+      clientId: ${ADAFRUIT_CLIENT_ID:iot-backend-client-prod}
+    list_feeds: ${ADAFRUIT_LIST_FEEDS:output-ledrgb,output-water-pumps,output-relay,input-temperature,input-humidity,input-soil-moisture,input-light}
     feeds:
-      led: ${ADAFRUIT_FEED_LED}
-      waterPump: ${ADAFRUIT_FEED_WATER_PUMP}
-      relay: ${ADAFRUIT_FEED_RELAY}
-      temperature: ${ADAFRUIT_FEED_TEMPERATURE}
-      humidity: ${ADAFRUIT_FEED_HUMIDITY}
-      soilMoisture: ${ADAFRUIT_FEED_SOIL_MOISTURE}
-      light: ${ADAFRUIT_FEED_LIGHT}
+      led: ${ADAFRUIT_FEED_LED:output-ledrgb}
+      waterPump: ${ADAFRUIT_FEED_WATER_PUMP:output-water-pumps}
+      relay: ${ADAFRUIT_FEED_RELAY:output-relay}
+      temperature: ${ADAFRUIT_FEED_TEMPERATURE:input-temperature}
+      humidity: ${ADAFRUIT_FEED_HUMIDITY:input-humidity}
+      soilMoisture: ${ADAFRUIT_FEED_SOIL_MOISTURE:input-soil-moisture}
+      light: ${ADAFRUIT_FEED_LIGHT:input-light}
