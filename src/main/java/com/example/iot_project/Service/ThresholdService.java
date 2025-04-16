@@ -10,8 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Service
 public class ThresholdService {
@@ -28,7 +27,17 @@ public class ThresholdService {
     final ThresholdRepository thresholdRepository;
 //    final JavaMailSender mailSender;
     final NotificationService notificationService;
-//    final AdafruitService AdafruitService;
+    final AdafruitService adafruitService;
+
+    public ThresholdService(
+            ThresholdRepository thresholdRepository,
+            NotificationService notificationService,
+            @Lazy AdafruitService adafruitService) {
+        this.thresholdRepository = thresholdRepository;
+        this.notificationService = notificationService;
+        this.adafruitService = adafruitService;
+    }
+
 
     @Value("${adafruit.io.feeds.waterPump}")
     private String waterPumpFeed;
@@ -124,17 +133,27 @@ public class ThresholdService {
                 }
 
                 // Handle device activation for relevant types
-//                if (type == DeviceType.SOIL_MOISTURE || type == DeviceType.DHT20_HUMIDITY || type == DeviceType.LIGHT) {
-//                    String deviceFeed = getDeviceFeedForType(type);
-//                    if (deviceFeed != null) {
-//                        String value = (type == DeviceType.LIGHT) ? "white" : "1";
-//                        AdafruitService.publishToFeed(deviceFeed, value);
-//                        log.info("Activated device {}: currentValue={} is below min={}", deviceFeed, currentValue, minValue);
-//                    }
-//                    else{
-//                        log.warn("No feed defined for device type: {}", type);
-//                    }
-//                }
+                if (type == DeviceType.SOIL_MOISTURE) {
+                    adafruitService.publishToFeed(waterPumpFeed, "1");
+                    log.info("Activated water pump for soil moisture: currentValue={} is below min={}", currentValue, minValue);
+
+                    // Schedule pump to turn off after 5 seconds
+                    new Thread(() -> {
+                        try {
+                            Thread.sleep(5000);
+                            adafruitService.publishToFeed(waterPumpFeed, "0");
+                            log.info("Deactivated water pump after 5 seconds");
+                        } catch (InterruptedException e) {
+                            log.error("Error while waiting to turn off pump", e);
+                            Thread.currentThread().interrupt();
+                        }
+                    }).start();
+                }
+                // Handle light case - just turn on
+                else if (type == DeviceType.LIGHT) {
+                    adafruitService.publishToFeed(ledFeed, "white");
+                    log.info("Activated LED: currentValue={} is below min={}", currentValue, minValue);
+                }
             }
             else if (maxValue != null && currentValue > maxValue) {
                 if (shouldNotify) {
@@ -150,17 +169,10 @@ public class ThresholdService {
                     log.info("Notification for {} skipped due to cooldown", type);
                 }
 
-//                if (type == DeviceType.SOIL_MOISTURE || type == DeviceType.DHT20_HUMIDITY || type == DeviceType.LIGHT) {
-//                    String deviceFeed = getDeviceFeedForType(type);
-//                    if (deviceFeed != null) {
-//                        String value = (type == DeviceType.LIGHT) ? "black" : "0";
-//                        AdafruitService.publishToFeed(deviceFeed, value);
-//                        log.info("Deactivated device {}: currentValue={} is above max={}", deviceFeed, currentValue, maxValue);
-//                    }
-//                    else{
-//                        log.warn("No feed defined for device type: {}", type);
-//                    }
-//                }
+                if (type == DeviceType.LIGHT) {
+                    adafruitService.publishToFeed(ledFeed, "black");
+                    log.info("Deactivated LED: currentValue={} is above max={}", currentValue, maxValue);
+                }
             }
         }
     }

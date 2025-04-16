@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-address>/<database>
+      - MONGODB_DATABASE=db1
+      - REDIS_URL=<redis-url>
+      - ADAFRUIT_USERNAME=<adafruit-username>
+      - ADAFRUIT_KEY=<adafruit-key>
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:

@@ -6,11 +6,9 @@ import com.example.iot_project.DTO.Request.LogOutRequest;
 import com.example.iot_project.DTO.Request.RefreshRequest;
 import com.example.iot_project.DTO.Response.AuthenResponse;
 import com.example.iot_project.DTO.Response.IntrospectResponse;
-import com.example.iot_project.Entity.InvalidToken;
 import com.example.iot_project.Entity.User;
 import com.example.iot_project.Exception.AppException;
 import com.example.iot_project.Exception.ErrorCode;
-import com.example.iot_project.Repository.InvalidatedTokenRepository;
 import com.example.iot_project.Repository.UserRepository;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -40,7 +38,7 @@ import java.util.UUID;
 public class AuthenticateService {
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
-    InvalidatedTokenRepository invalidatedTokenRepository;
+    TokenService tokenService;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -58,16 +56,29 @@ public class AuthenticateService {
     public AuthenResponse login(AuthenRequest requests) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
-        //can check email instead of username?
         User user = userRepository.findByUsername(requests.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!passwordEncoder.matches(requests.getPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
         }
-        String token = generateToken(user);
+
+        String accessToken = generateToken(user);
+        String refreshToken = generateRefreshToken(user);
+
+        // Store refresh token in Redis
+        try {
+            var jti = SignedJWT.parse(refreshToken).getJWTClaimsSet().getJWTID();
+            var expiry = SignedJWT.parse(refreshToken).getJWTClaimsSet().getExpirationTime();
+            long ttlSeconds = (expiry.getTime() - System.currentTimeMillis()) / 1000;
+            tokenService.storeRefreshToken(jti, ttlSeconds);
+        } catch (ParseException e) {
+            throw new RuntimeException("Error parsing refresh token", e);
+        }
+
         return AuthenResponse.builder()
-                .token(token)
+                .token(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 
@@ -107,20 +118,23 @@ public class AuthenticateService {
     }
 
     public void logout(LogOutRequest request) throws ParseException, JOSEException {
-
         try {
-            var signToken = verifyToken(request.getToken(),true);
+            SignedJWT signedJWT = SignedJWT.parse(request.getToken());
+            String jti = signedJWT.getJWTClaimsSet().getJWTID();
+            Date expiryDate = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-            String jit = signToken.getJWTClaimsSet().getJWTID();
-            Date ex = signToken.getJWTClaimsSet().getExpirationTime();
+            // Invalidate the access token
+            tokenService.invalidateToken(jti, expiryDate);
 
-            InvalidToken invalidToken = InvalidToken.builder()
-                    .id(jit)
-                    .expiredDate(ex)
-                    .build();
-            invalidatedTokenRepository.save(invalidToken);
-        } catch(AppException e){
-            log.error("Error when logout", e);
+            // Also invalidate the refresh token if provided
+            if (request.getRefreshToken() != null) {
+                SignedJWT refreshJWT = SignedJWT.parse(request.getRefreshToken());
+                String refreshJti = refreshJWT.getJWTClaimsSet().getJWTID();
+                tokenService.invalidateRefreshToken(refreshJti);
+            }
+        } catch (Exception e) {
+            log.error("Error during logout", e);
+            throw new AppException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -130,13 +144,14 @@ public class AuthenticateService {
         Date expirationTime = isRefresh
                 ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(REFRESH_DURATION, ChronoUnit.SECONDS).toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
+
         var verified = signedJWT.verify(verifier);
         if (!(verified && expirationTime.after(new Date()))) {
             throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
         }
 
-        if(invalidatedTokenRepository
-                .existsById(signedJWT.getJWTClaimsSet().getJWTID())){
+        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+        if (jti != null && tokenService.isTokenInvalidated(jti)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
         }
 
@@ -146,22 +161,31 @@ public class AuthenticateService {
 
     public AuthenResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken(),true);
-        var jit = signedJWT.getJWTClaimsSet().getJWTID();
-        var ex = signedJWT.getJWTClaimsSet().getExpirationTime();
+        var jti = signedJWT.getJWTClaimsSet().getJWTID();
 
-        InvalidToken invalidToken = InvalidToken.builder()
-                .id(jit)
-                .expiredDate(ex)
-                .build();
-        invalidatedTokenRepository.save(invalidToken);
+        // Validate refresh token
+        if (!tokenService.isRefreshTokenValid(jti)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
+        }
+
+        tokenService.invalidateRefreshToken(jti);
 
         var username = signedJWT.getJWTClaimsSet().getSubject();
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        String token = generateToken(user);
+        String newAccessToken = generateToken(user);
+        String newRefreshToken = generateRefreshToken(user);
+
+        // Store the new refresh token in Redis
+        var newJti = SignedJWT.parse(newRefreshToken).getJWTClaimsSet().getJWTID();
+        var refreshExpiry = SignedJWT.parse(newRefreshToken).getJWTClaimsSet().getExpirationTime();
+        long ttlSeconds = (refreshExpiry.getTime() - System.currentTimeMillis()) / 1000;
+        tokenService.storeRefreshToken(newJti, ttlSeconds);
+
         return AuthenResponse.builder()
-                .token(token)
+                .token(newAccessToken)
+                .refreshToken(newRefreshToken)
                 .build();
     }
 
@@ -187,4 +211,25 @@ public class AuthenticateService {
         }
 
     }
+
+    private String generateRefreshToken(User user) {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+        JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getUsername())
+                .issuer("iot.com")
+                .issueTime(new Date())
+                .expirationTime(new Date(Instant.now().plus(REFRESH_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
+                .build();
+        Payload payload = new Payload(claimsSet.toJSONObject());
+        JWSObject jwsObject = new JWSObject(header, payload);
+        try {
+            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            log.error("Error when generating refresh token", e);
+            throw new RuntimeException(e);
+        }
+    }
+
 }
