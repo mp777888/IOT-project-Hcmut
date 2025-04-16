@@ -57,3 +57,5 @@ adafruit:
 
 jwt:
   signerKey: "cu+ODg482KxZvCd26KS9JRGbJZjtvGWrF+ZGlgqjIPTf5YImGQ9r/VDAjQUsTbgN"
+  valid-duration: 3600 # seconds
+  refresh-duration: 604800 # seconds
