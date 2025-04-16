@@ -1,0 +1,31 @@
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE}
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      timeout: 3000
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 4
+
+adafruit:
+  io:
+    username: ${ADAFRUIT_USERNAME}
+    key: ${ADAFRUIT_KEY}
+    mqtt:
+      host: tcp://io.adafruit.com:1883
+      clientId: iot-backend-client-prod
+    list_feeds: ${ADAFRUIT_FEEDS_LIST}
+    feeds:
+      led: ${ADAFRUIT_FEED_LED}
+      waterPump: ${ADAFRUIT_FEED_WATER_PUMP}
+      relay: ${ADAFRUIT_FEED_RELAY}
+      temperature: ${ADAFRUIT_FEED_TEMPERATURE}
+      humidity: ${ADAFRUIT_FEED_HUMIDITY}
+      soilMoisture: ${ADAFRUIT_FEED_SOIL_MOISTURE}
+      light: ${ADAFRUIT_FEED_LIGHT}

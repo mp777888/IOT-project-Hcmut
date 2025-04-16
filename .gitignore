@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Environment files
+.env
+**/application-dev.yml
+**/application-prod.yml
+
+# Docker files with credentials
+docker-compose.yml
