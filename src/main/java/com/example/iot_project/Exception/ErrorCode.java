@@ -9,6 +9,7 @@ public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Lỗi không xác định", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1111, "Lỗi máy chủ", HttpStatus.INTERNAL_SERVER_ERROR),
     ACCESS_DENIED(1111, "Truy cập bị từ chối", HttpStatus.FORBIDDEN),
+    INTERNAL_SERVER_ERROR(1111, "Lỗi máy chủ", HttpStatus.INTERNAL_SERVER_ERROR),
     USER_NOT_EXISTED(1001, "User không tồn tại", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED_EXCEPTION(1002, "Lỗi xác thực", HttpStatus.UNAUTHORIZED),
     USER_NAME_INVALID(1003,"Username phải từ 6 ký tự trở lên",HttpStatus.BAD_REQUEST),
