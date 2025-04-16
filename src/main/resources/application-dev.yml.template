@@ -1,0 +1,32 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://<username>:<password>@<cluster-address>/<database>?retryWrites=true&w=majority
+      database: db1
+    redis:
+      url: ${REDIS_URL}
+      ssl:
+        enabled: true
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+# Adafruit IO MQTT Configuration
+adafruit:
+  io:
+    username: <adafruit-username>
+    key: <adafruit-key>
+    mqtt:
+      host: tcp://io.adafruit.com:1883
+      clientId: iot-backend-client-spring
+    list_feeds: output-ledrgb,output-water-pumps,output-relay,input-temperature,input-humidity,input-soil-moisture,input-light
+    feeds:
+      led: output-ledrgb
+      waterPump: output-water-pumps
+      relay: output-relay
+      temperature: input-temperature
+      humidity: input-humidity
+      soilMoisture: input-soil-moisture
+      light: input-light

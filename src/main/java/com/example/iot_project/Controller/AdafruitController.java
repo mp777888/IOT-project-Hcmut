@@ -1,13 +1,10 @@
 package com.example.iot_project.Controller;
 
-import com.example.iot_project.DTO.Request.ThresholdRequest;
 import com.example.iot_project.DTO.Response.LatestResponse;
-import com.example.iot_project.DTO.Response.ThresholdResponse;
 import com.example.iot_project.Entity.FeedData;
 import com.example.iot_project.Exception.ApiResponse;
 import com.example.iot_project.Repository.FeedDataRepository;
 import com.example.iot_project.Service.AdafruitService;
-import com.example.iot_project.Service.ThresholdService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
