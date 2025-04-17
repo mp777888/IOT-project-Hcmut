@@ -8,17 +8,6 @@ spring:
     name: iot-project
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:940706370382-7rvr872c9e901bnive669k3otin44ej6.apps.googleusercontent.com}
-            client-secret: ${GOOGLE_CLIENT_SECRET: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}
-            scope:
-              - email
-              - profile
-              - openid
 
 app:
   notification:
