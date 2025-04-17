@@ -83,18 +83,34 @@ public class AuthenticateService {
     }
 
     public AuthenResponse authenticateByGoogle(String email) {
-        if(userRepository.findByEmail(email).isPresent()){
-            throw new AppException(ErrorCode.USER_EXISTED);
+        User user;
+        if(!userRepository.findByEmail(email).isPresent()){
+            user = User.builder()
+                    .email(email)
+                    .username(email)
+                    .password(passwordEncoder.encode("123456"))
+                    .build();
+            userRepository.save(user);
+        } else {
+            user = userRepository.findByEmail(email).get();
         }
-        var user = User.builder()
-                .email(email)
-                .username(email)
-                .password(passwordEncoder.encode("123456"))
-                .build();
-        userRepository.save(user);
-        String token = generateToken(user);
+
+        String accessToken = generateToken(user);
+        String refreshToken = generateRefreshToken(user);
+
+        // Store refresh token in Redis
+        try {
+            var jti = SignedJWT.parse(refreshToken).getJWTClaimsSet().getJWTID();
+            var expiry = SignedJWT.parse(refreshToken).getJWTClaimsSet().getExpirationTime();
+            long ttlSeconds = (expiry.getTime() - System.currentTimeMillis()) / 1000;
+            tokenService.storeRefreshToken(jti, ttlSeconds);
+        } catch (ParseException e) {
+            throw new RuntimeException("Error parsing refresh token", e);
+        }
+
         return AuthenResponse.builder()
-                .token(token)
+                .token(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 

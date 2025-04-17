@@ -43,7 +43,7 @@ public class Config {
                             .permitAll()
                             .anyRequest().authenticated())
             .oauth2Login(oauth2 -> oauth2
-                    .defaultSuccessUrl("/login/callback", true))
+                    .defaultSuccessUrl("/auth/callback", true))
             .formLogin(Customizer.withDefaults())
         ;
         http.oauth2ResourceServer(oauth2 ->

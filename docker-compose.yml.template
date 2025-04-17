@@ -6,6 +6,8 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
+      - GOOGLE_CLIENT_ID=<google-client-id>
+      - GOOGLE_CLIENT_SECRET=<google-client-secret>
       - MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-address>/<database>
       - MONGODB_DATABASE=db1
       - REDIS_URL=<redis-url>
