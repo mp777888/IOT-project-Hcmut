@@ -122,6 +122,13 @@ public class AuthenticateService {
         boolean isValid = true;
 
         try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            String type = (String) signedJWT.getJWTClaimsSet().getClaim("type");
+
+            // Chỉ chấp nhận token có type là "access"
+            if (!"access".equals(type)) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED_EXCEPTION);
+            }
             verifyToken(token,false);
 
         }catch(AppException e){
@@ -215,6 +222,7 @@ public class AuthenticateService {
                 .expirationTime(new Date(Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("name", user.getUsername()) // Thêm thông tin email
+                .claim("type", "access")
                 .build();
         Payload payload = new Payload(claimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
@@ -235,6 +243,7 @@ public class AuthenticateService {
                 .issuer("iot.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(REFRESH_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                .claim("type", "refresh")
                 .jwtID(UUID.randomUUID().toString())
                 .build();
         Payload payload = new Payload(claimsSet.toJSONObject());
