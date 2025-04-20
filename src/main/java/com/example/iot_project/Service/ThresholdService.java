@@ -151,7 +151,7 @@ public class ThresholdService {
                 }
                 // Handle light case - just turn on
                 else if (type == DeviceType.LIGHT) {
-                    adafruitService.publishToFeed(ledFeed, "white");
+                    adafruitService.publishToFeed(ledFeed, "red");
                     log.info("Activated LED: currentValue={} is below min={}", currentValue, minValue);
                 }
             }
@@ -170,7 +170,7 @@ public class ThresholdService {
                 }
 
                 if (type == DeviceType.LIGHT) {
-                    adafruitService.publishToFeed(ledFeed, "black");
+                    adafruitService.publishToFeed(ledFeed, "white");
                     log.info("Deactivated LED: currentValue={} is above max={}", currentValue, maxValue);
                 }
             }
