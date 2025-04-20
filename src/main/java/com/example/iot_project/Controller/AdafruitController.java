@@ -320,4 +320,44 @@ public class AdafruitController {
                     .build();
         }
     }
+
+    @GetMapping("/data/water-pump")
+    public ApiResponse<FeedData> getLatestWaterPumpData() {
+        List<FeedData> waterPumpData = feedDataRepository.findByFeedNameOrderByTimestampDesc(waterPumpFeed);
+        if (!waterPumpData.isEmpty()) {
+            FeedData latest = waterPumpData.getFirst();
+            log.info("Fetched latest water pump data: {}", latest);
+            return ApiResponse.<FeedData>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Dữ liệu mới nhất của máy bơm nước")
+                    .result(latest)
+                    .build();
+        } else {
+            log.warn("No data found for water pump feed: {}", waterPumpFeed);
+            return ApiResponse.<FeedData>builder()
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .message("Không tìm thấy dữ liệu cho máy bơm nước")
+                    .build();
+        }
+    }
+
+    @GetMapping("/data/led")
+    public ApiResponse<FeedData> getLatestLedData() {
+        List<FeedData> ledData = feedDataRepository.findByFeedNameOrderByTimestampDesc(ledFeed);
+        if (!ledData.isEmpty()) {
+            FeedData latest = ledData.getFirst();
+            log.info("Fetched latest LED data: {}", latest);
+            return ApiResponse.<FeedData>builder()
+                    .code(HttpStatus.OK.value())
+                    .message("Dữ liệu mới nhất của LED")
+                    .result(latest)
+                    .build();
+        } else {
+            log.warn("No data found for LED feed: {}", ledFeed);
+            return ApiResponse.<FeedData>builder()
+                    .code(HttpStatus.NOT_FOUND.value())
+                    .message("Không tìm thấy dữ liệu cho LED")
+                    .build();
+        }
+    }
 }
