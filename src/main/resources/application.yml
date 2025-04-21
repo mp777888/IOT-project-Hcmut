@@ -9,6 +9,9 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   data:
+    mongodb:
+      uri: ${MONGODB_URI}
+      database: ${MONGODB_DATABASE}
     redis:
       url: ${REDIS_URL}
       ssl:
@@ -35,7 +38,6 @@ app:
   notification:
     email: ${NOTIFICATION_EMAIL:anhkhoabuivu@gmail.com}
 
-# JWT Configuration
 jwt:
   signerKey: ${JWT_SIGNER_KEY:cu+ODg482KxZvCd26KS9JRGbJZjtvGWrF+ZGlgqjIPTf5YImGQ9r/VDAjQUsTbgN}
   valid-duration: 3600
@@ -43,14 +45,17 @@ jwt:
 
 adafruit:
   io:
+    username: ${ADAFRUIT_USERNAME}
+    key: ${ADAFRUIT_KEY}
     mqtt:
       host: ${ADAFRUIT_MQTT_HOST:tcp://io.adafruit.com:1883}
-    list_feeds: output-ledrgb,output-water-pumps,output-relay,input-temperature,input-humidity,input-soil-moisture,input-light
+      clientId: ${ADAFRUIT_CLIENT_ID:iot-backend-client-spring}
+    list_feeds: ${ADAFRUIT_LIST_FEEDS:output-ledrgb,output-water-pumps,output-relay,input-temperature,input-humidity,input-soil-moisture,input-light}
     feeds:
-      led: output-ledrgb
-      waterPump: output-water-pumps
-      relay: output-relay
-      temperature: input-temperature
-      humidity: input-humidity
-      soilMoisture: input-soil-moisture
-      light: input-light
+      led: ${ADAFRUIT_FEED_LED:output-ledrgb}
+      waterPump: ${ADAFRUIT_FEED_WATER_PUMP:output-water-pumps}
+      relay: ${ADAFRUIT_FEED_RELAY:output-relay}
+      temperature: ${ADAFRUIT_FEED_TEMPERATURE:input-temperature}
+      humidity: ${ADAFRUIT_FEED_HUMIDITY:input-humidity}
+      soilMoisture: ${ADAFRUIT_FEED_SOIL_MOISTURE:input-soil-moisture}
+      light: ${ADAFRUIT_FEED_LIGHT:input-light}
