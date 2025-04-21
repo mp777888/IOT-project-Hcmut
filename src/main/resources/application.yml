@@ -8,6 +8,17 @@ spring:
     name: iot-project
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  data:
+    redis:
+      url: ${REDIS_URL}
+      ssl:
+        enabled: true
+      timeout: 5000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
   security:
     oauth2:
       client:
@@ -19,6 +30,7 @@ spring:
               - email
               - profile
               - openid
+
 app:
   notification:
     email: ${NOTIFICATION_EMAIL:anhkhoabuivu@gmail.com}
@@ -26,5 +38,19 @@ app:
 # JWT Configuration
 jwt:
   signerKey: ${JWT_SIGNER_KEY:cu+ODg482KxZvCd26KS9JRGbJZjtvGWrF+ZGlgqjIPTf5YImGQ9r/VDAjQUsTbgN}
-  valid-duration: 3600 # seconds
-  refresh-duration: 604800 # seconds
+  valid-duration: 3600
+  refresh-duration: 604800
+
+adafruit:
+  io:
+    mqtt:
+      host: ${ADAFRUIT_MQTT_HOST:tcp://io.adafruit.com:1883}
+    list_feeds: output-ledrgb,output-water-pumps,output-relay,input-temperature,input-humidity,input-soil-moisture,input-light
+    feeds:
+      led: output-ledrgb
+      waterPump: output-water-pumps
+      relay: output-relay
+      temperature: input-temperature
+      humidity: input-humidity
+      soilMoisture: input-soil-moisture
+      light: input-light
