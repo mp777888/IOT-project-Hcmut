@@ -74,7 +74,7 @@ public class Config {
                 "http://localhost:3001",
                 "http://localhost:5173",
                 "http://localhost:5174",
-                "https://*.vercel.app"
+                "https://ecology-dadn-fork.vercel.app"
         ));
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
