@@ -41,12 +41,40 @@ cd IOT-project-Hcmut
 ```
 
 ### 2. Configure application properties
-- Create configuration files from templates:
+- Create .env files and add your information:
 ```bash
-cp src/main/resources/application-dev.yml.template src/main/resources/application-dev.yml
-cp src/main/resources/application-prod.yml.template src/main/resources/application-prod.yml
-cp docker-compose.yml.template docker-compose.yml
+SERVER_PORT=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+MONGODB_URI=
+MONGODB_DATABASE=
+REDIS_URL=
+ADAFRUIT_USERNAME=
+ADAFRUIT_KEY=
+JWT_SIGNER_KEY=
+NOTIFICATION_EMAIL=
 ```
 
 
-### 3. Update the configuration files with your credentials:
+### 3. Build the project
+
+```bash
+mvn clean install
+```
+
+### 4. Run the application
+#### Using Docker Compose
+
+```bash
+docker-compose up --build
+```
+#### Using Maven
+
+```bash
+mvn spring-boot:run
+```
+### 5. Access the application
+- Open your web browser and navigate to `http://localhost:8080`
+- You can also access the Adafruit IO dashboard at `https://io.adafruit.com/`
+- For the REST API, use tools like Postman or curl to interact with the endpoints.
+- To visualize the data and control the devices, you can clone and run the Frontend repository separately. The forked repository is available at: [https://github.com/mp777888/Ecology_DADN-fork.git](https://github.com/mp777888/Ecology_DADN-fork.git)
